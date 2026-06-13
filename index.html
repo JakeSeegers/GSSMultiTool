@@ -895,6 +895,22 @@
     font-size:11px;color:var(--ink-3);
     font-family:'JetBrains Mono',monospace;
   }
+  .settings-schedule-area{
+    width:100%;box-sizing:border-box;
+    background:var(--panel-2);border:1px solid var(--line);
+    color:var(--ink);font-family:'JetBrains Mono',monospace;
+    font-size:11px;line-height:1.5;
+    padding:10px;border-radius:4px;
+    min-height:220px;max-height:400px;
+    resize:vertical;outline:none;
+    margin-top:10px;
+  }
+  .settings-schedule-area:focus{border-color:var(--accent)}
+  .settings-import-msg{
+    font-size:11px;margin-top:6px;min-height:16px;
+  }
+  .settings-import-msg.ok{color:var(--ok)}
+  .settings-import-msg.err{color:var(--danger)}
 
   /* ====== Accessibility ====== */
   @media (prefers-reduced-motion:reduce){
@@ -908,7 +924,7 @@
 
   <!-- ===== Clock strip ===== -->
   <header class="clock-strip">
-    <svg class="ring" width="108" height="108" viewBox="-50 -50 300 300" aria-hidden="true">
+    <svg class="ring" width="148" height="148" viewBox="-50 -50 300 300" aria-hidden="true">
       <g id="tracker-rings"></g>
       <g id="focus-ring"></g>
       <circle cx="100" cy="100" r="88" fill="none" stroke="#2d2925" stroke-width="6"/>
@@ -1230,6 +1246,18 @@
     </div>
     <div class="sep"></div>
     <div class="settings-block">
+      <div class="settings-label">Schedule</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:8px">Export the shift schedule to JSON, edit the text, then Import to apply. Changes persist across reloads. Reload the page after importing.</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="btn sm primary" id="settings-export-sched">Export Schedule</button>
+        <button class="btn sm" id="settings-import-sched">Import Schedule</button>
+        <button class="btn sm danger" id="settings-reset-sched">Reset to Default</button>
+      </div>
+      <textarea class="settings-schedule-area" id="settings-schedule-area" spellcheck="false" placeholder="Click Export to load the current schedule…"></textarea>
+      <div class="settings-import-msg" id="settings-import-msg"></div>
+    </div>
+    <div class="sep"></div>
+    <div class="settings-block">
       <div class="settings-label">App</div>
       <div class="settings-app-name">GSS Multi-Tool</div>
       <div class="settings-app-meta" id="settings-store-key"></div>
@@ -1310,7 +1338,7 @@ function saveStore(patch){
 /* =======================================================
    1) CLOCK
    ======================================================= */
-const PH=[
+let PH=[
   {s:5,e:7,n:"Early Morning",t:"5 – 7 AM",
    sum:"Overnight wrap-up, pharmacy pass, and the 6 AM collision point",
    d:[
@@ -1442,6 +1470,14 @@ const PH=[
      ]}
    ]}
 ];
+
+// Allow user-edited schedule stored in localStorage to override the built-in PH array
+(()=>{
+  try{
+    const saved=loadStore().customSchedule;
+    if(saved&&Array.isArray(saved)&&saved.length) PH=saved;
+  }catch(e){}
+})();
 
 function gp(h){
   for(const p of PH){
@@ -1652,7 +1688,25 @@ document.querySelectorAll('.tab[data-target]').forEach(btn=>{
    3) TRACKER
    ======================================================= */
 const EMOJIS={
-  people:['👨','👩','👴','👵','🧒','👶','👮','👷','💂','🕵️','👨‍⚕️','👩‍⚕️','👨‍🔧','👩‍🔧','👨‍💼','👩‍💼','👫','👬','👭','🧔','🧓','🧑‍🎓','👨‍🍳','👩‍🍳','🚶','🏃','🧘','🗣️','👤','👥','🙋','🤷'],
+  people:[
+    '👨','👨🏻','👨🏼','👨🏽','👨🏾','👨🏿',
+    '👩','👩🏻','👩🏼','👩🏽','👩🏾','👩🏿',
+    '🧑','🧑🏻','🧑🏼','🧑🏽','🧑🏾','🧑🏿',
+    '🧒','🧒🏻','🧒🏼','🧒🏽','🧒🏾','🧒🏿',
+    '👦','👦🏻','👦🏼','👦🏽','👦🏾','👦🏿',
+    '👧','👧🏻','👧🏼','👧🏽','👧🏾','👧🏿',
+    '👴','👴🏻','👴🏼','👴🏽','👴🏾','👴🏿',
+    '👵','👵🏻','👵🏼','👵🏽','👵🏾','👵🏿',
+    '👶','👶🏻','👶🏼','👶🏽','👶🏾','👶🏿',
+    '👮','👮🏻','👮🏼','👮🏽','👮🏾','👮🏿',
+    '👷','👷🏻','👷🏼','👷🏽','👷🏾','👷🏿',
+    '🙋','🙋🏻','🙋🏼','🙋🏽','🙋🏾','🙋🏿',
+    '🤷','🤷🏻','🤷🏼','🤷🏽','🤷🏾','🤷🏿',
+    '🧔','🧔🏻','🧔🏼','🧔🏽','🧔🏾','🧔🏿',
+    '💂','💂🏻','💂🏼','💂🏽','💂🏾','💂🏿',
+    '🕵️','🧓','👨‍⚕️','👩‍⚕️','👨‍🔧','👩‍🔧','👨‍💼','👩‍💼',
+    '🧑‍🎓','👨‍🍳','👩‍🍳','🚶','🏃','🧘','🗣️','👤','👥'
+  ],
   vehicles:['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚚','🚛','🚜','🛴','🚲','🛵','🏍️','🚁','🚂','✈️','🚀','🛻','🚐','🚉','⛵','🛥️','🛺'],
   status:['✅','❌','⛔','🚫','💤','⏱️','⏲️','⏰','⌛','⏳','🔄','🔃','📥','📤','⚠️','🆘','🆕','🆗','🔒','🔓','🔔','📍','📅','📆','🚪','🛑'],
   misc:['📞','☕','🍕','🍽️','📱','📖','💧','💼','🚻','😷','🤒','🤕','🌧️','🌞','🌳','🚬','🛒','💊','📺','🎧','📚','🔧','🔋','🌼','📦','📋']
@@ -2338,6 +2392,41 @@ calcFTO();
     const next=(s.edition||1)+1;
     saveSettings({edition:next,editionDate:new Date().toISOString()});
     renderSettings();
+  });
+
+  // Schedule export / import
+  const schedArea=document.getElementById('settings-schedule-area');
+  const schedMsg=document.getElementById('settings-import-msg');
+
+  document.getElementById('settings-export-sched').addEventListener('click',()=>{
+    schedArea.value=JSON.stringify(PH,null,2);
+    schedMsg.textContent=''; schedMsg.className='settings-import-msg';
+  });
+
+  document.getElementById('settings-import-sched').addEventListener('click',()=>{
+    try{
+      const parsed=JSON.parse(schedArea.value);
+      if(!Array.isArray(parsed)||!parsed.length) throw new Error('Must be a non-empty array');
+      for(const p of parsed){
+        if(typeof p.s!=='number'||typeof p.e!=='number'||!p.n||!p.t||!p.sum||!Array.isArray(p.d)||!p.nx)
+          throw new Error('Each phase needs: s, e, n, t, sum, d (array), nx');
+      }
+      saveStore({customSchedule:parsed});
+      PH=parsed;
+      lastP=null; // force clock to re-render phase name
+      schedMsg.textContent='✓ Imported — schedule updated.';
+      schedMsg.className='settings-import-msg ok';
+    }catch(e){
+      schedMsg.textContent='✗ '+e.message;
+      schedMsg.className='settings-import-msg err';
+    }
+  });
+
+  document.getElementById('settings-reset-sched').addEventListener('click',()=>{
+    saveStore({customSchedule:null});
+    schedArea.value='';
+    schedMsg.textContent='Default schedule restored — reload the page to apply.';
+    schedMsg.className='settings-import-msg ok';
   });
 
   // Init: set edition 1 if none saved
