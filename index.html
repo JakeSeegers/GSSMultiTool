@@ -869,6 +869,33 @@
     line-height:1.6;
   }
 
+  /* ====== SETTINGS PANE ====== */
+  .settings-block{margin-bottom:20px}
+  .settings-label{
+    font-size:10px;color:var(--ink-3);
+    letter-spacing:2px;text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .settings-edition{
+    font-family:'JetBrains Mono',monospace;
+    font-size:48px;font-weight:700;
+    color:var(--accent);letter-spacing:-2px;line-height:1;
+    margin-bottom:6px;
+  }
+  .settings-edition-date{
+    font-size:11px;color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;
+    margin-bottom:14px;
+  }
+  .settings-app-name{
+    font-size:18px;font-weight:600;color:var(--ink);
+    margin-bottom:4px;
+  }
+  .settings-app-meta{
+    font-size:11px;color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;
+  }
+
   /* ====== Accessibility ====== */
   @media (prefers-reduced-motion:reduce){
     *{transition:none !important;animation:none !important}
@@ -915,6 +942,7 @@
       <button class="tab" role="tab" aria-selected="false" data-target="vr">VR List<span class="count hidden" id="vr-count">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-target="movement">Focus Timer</button>
       <button class="tab" role="tab" aria-selected="false" data-target="misc">Misc</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="settings">⚙</button>
       <a class="tab external" href="https://vcc.med.umich.edu/Home/MiChartMottCapacity" target="_blank" rel="noopener">MiChart</a>
     </nav>
   </div>
@@ -1189,6 +1217,22 @@
       <div class="fto-label">FTO Pay</div>
       <div class="fto-amount" id="fto-amount">Enter values</div>
       <div class="fto-break" id="fto-break"></div>
+    </div>
+  </section>
+
+  <!-- ===== Pane: Settings ===== -->
+  <section class="pane" data-pane="settings" role="tabpanel" aria-hidden="true">
+    <div class="settings-block">
+      <div class="settings-label">Edition</div>
+      <div class="settings-edition" id="settings-edition">—</div>
+      <div class="settings-edition-date" id="settings-edition-date"></div>
+      <button class="btn primary" id="settings-bump">Bump Edition</button>
+    </div>
+    <div class="sep"></div>
+    <div class="settings-block">
+      <div class="settings-label">App</div>
+      <div class="settings-app-name">GSS Multi-Tool</div>
+      <div class="settings-app-meta" id="settings-store-key"></div>
     </div>
   </section>
 </div>
@@ -1543,9 +1587,12 @@ function updateClockRings(){
   }
 
   // ---- Tracker rings (outside main arc: r=96,107,118,129) ----
-  if(typeof trackerData==='undefined'||!trackerData.length) return;
+  // trackerData is a let declared later in the script; guard against TDZ on first tick
+  let td;
+  try{ td=trackerData; }catch(e){ return; }
+  if(!td||!td.length) return;
   const RADII=[96,107,118,129];
-  trackerData.slice(0,RADII.length).forEach((o,i)=>{
+  td.slice(0,RADII.length).forEach((o,i)=>{
     const r=RADII[i];
     const sec=elapsedSec(o), min=Math.floor(sec/60);
     const frac=Math.min(sec/(20*60),1);
@@ -2267,6 +2314,36 @@ calcFTO();
   };
 
   updateDisplay();
+})();
+
+/* =======================================================
+   SETTINGS — edition bump
+   ======================================================= */
+(function(){
+  function loadSettings(){ return loadStore().settings||{}; }
+  function saveSettings(patch){ saveStore({settings:{...loadSettings(),...patch}}); }
+
+  function renderSettings(){
+    const s=loadSettings();
+    const ed=s.edition||1;
+    document.getElementById('settings-edition').textContent='Edition '+ed;
+    const d=s.editionDate?new Date(s.editionDate).toLocaleDateString('en-US',
+      {weekday:'short',year:'numeric',month:'short',day:'numeric'}):'—';
+    document.getElementById('settings-edition-date').textContent='Since '+d;
+    document.getElementById('settings-store-key').textContent='store: '+STORE_KEY;
+  }
+
+  document.getElementById('settings-bump').addEventListener('click',()=>{
+    const s=loadSettings();
+    const next=(s.edition||1)+1;
+    saveSettings({edition:next,editionDate:new Date().toISOString()});
+    renderSettings();
+  });
+
+  // Init: set edition 1 if none saved
+  const s=loadSettings();
+  if(!s.edition) saveSettings({edition:1,editionDate:new Date().toISOString()});
+  renderSettings();
 })();
 
 /* =======================================================
