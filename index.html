@@ -61,9 +61,9 @@
 
   /* ===== Top: clock strip ===== */
   .clock-strip{
-    padding:18px 20px 14px;
+    padding:10px 14px 10px;
     border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:14px;
+    display:flex;align-items:center;gap:12px;
     background:linear-gradient(180deg,#1f1c18 0%,var(--panel) 100%);
   }
   .ring{flex-shrink:0;overflow:visible}
@@ -924,7 +924,7 @@
 
   <!-- ===== Clock strip ===== -->
   <header class="clock-strip">
-    <svg class="ring" width="148" height="148" viewBox="-50 -50 300 300" aria-hidden="true">
+    <svg class="ring" width="200" height="200" viewBox="-50 -50 300 300" aria-hidden="true">
       <g id="tracker-rings"></g>
       <g id="focus-ring"></g>
       <circle cx="100" cy="100" r="88" fill="none" stroke="#2d2925" stroke-width="6"/>
@@ -949,6 +949,7 @@
   <div class="tabs-wrap" id="tabs-wrap">
     <nav class="tabs" id="tabs" role="tablist">
       <button class="tab active" role="tab" aria-selected="true" data-target="clock">Clock</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="details">Details</button>
       <button class="tab" role="tab" aria-selected="false" data-target="tracker">Tracker</button>
       <button class="tab" role="tab" aria-selected="false" data-target="passons">Pass-Ons<span class="count hidden" id="passon-count">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-target="todo">To-Do<span class="count hidden" id="todo-count">0</span></button>
@@ -979,6 +980,14 @@
       <div class="phase-time mono" id="pt">—</div>
     </div>
     <div class="phase-summary" id="ps">—</div>
+  </section>
+
+  <!-- ===== Pane: Details ===== -->
+  <section class="pane" data-pane="details" role="tabpanel" aria-hidden="true">
+    <div class="phase-card">
+      <div class="phase-name" id="pn-d">—</div>
+      <div class="phase-time mono" id="pt-d">—</div>
+    </div>
 
     <div class="detail-box" aria-live="polite" aria-atomic="true">
       <div class="d-layer on" id="la"><div class="d-txt" id="ta"></div></div>
@@ -1293,6 +1302,7 @@
       <div class="field">
         <label for="m-category">Category</label>
         <select id="m-category">
+          <option value="parent">Parent</option>
           <option value="staff">Staff</option>
           <option value="family">Family</option>
           <option value="visitor">Visitor</option>
@@ -1523,6 +1533,8 @@ function tickClock(){
   document.getElementById('pt').textContent=ph.t;
   document.getElementById('ps').textContent=ph.sum;
   document.getElementById('nx').textContent=ph.nx;
+  document.getElementById('pn-d').textContent=ph.n;
+  document.getElementById('pt-d').textContent=ph.t;
 
   if(lastP!==ph.n){
     lastP=ph.n; ci=0;
@@ -1743,7 +1755,7 @@ function uid(){return 'e'+Math.random().toString(36).slice(2,9)}
 function addEntry(emoji){
   const obj={
     id:uid(), emoji,
-    name:'', badge:'', status:'in', category:'staff', notes:'',
+    name:'', badge:'', status:'out', category:'parent', notes:'',
     startTime:Date.now(), elapsedPaused:0, pausedAt:0, isPaused:false,
     created:new Date().toISOString()
   };
