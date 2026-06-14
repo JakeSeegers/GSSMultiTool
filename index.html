@@ -65,6 +65,7 @@
     border-bottom:1px solid var(--line);
     display:flex;align-items:center;gap:12px;
     background:linear-gradient(180deg,#1f1c18 0%,var(--panel) 100%);
+    overflow:visible;
   }
   .ring{flex-shrink:0;overflow:visible}
   .time-block{display:flex;flex-direction:column;min-width:0;flex:1}
@@ -961,7 +962,7 @@
 
   <!-- ===== Clock strip ===== -->
   <header class="clock-strip">
-    <svg class="ring" width="200" height="200" viewBox="-50 -50 300 300" aria-hidden="true">
+    <svg class="ring" width="200" height="220" viewBox="-50 -70 300 320" aria-hidden="true">
       <g id="tracker-rings"></g>
       <g id="focus-ring"></g>
       <circle cx="100" cy="100" r="88" fill="none" stroke="#2d2925" stroke-width="6"/>
@@ -1701,11 +1702,11 @@ function updateClockRings(){
     emojiEl.addEventListener('click',()=>{ try{parkEntry(o.id);}catch(e){} });
     gL.appendChild(emojiEl);
     if(o.name){
-      const label=o.name.length>9?o.name.slice(0,8)+'…':o.name;
-      const nx=cx+(r+32)*Math.cos(ang), ny=cy+(r+32)*Math.sin(ang);
+      const label=o.name.length>14?o.name.slice(0,13)+'…':o.name;
+      const nx=cx+(r+36)*Math.cos(ang), ny=cy+(r+36)*Math.sin(ang);
       const nameEl=svgE('text',{x:nx,y:ny,'text-anchor':'middle',
-        'dominant-baseline':'middle','font-size':'10',
-        fill:color,'font-weight':'600',style:'cursor:pointer'},label);
+        'dominant-baseline':'middle','font-size':'14',
+        fill:color,'font-weight':'700',style:'cursor:pointer'},label);
       nameEl.addEventListener('click',()=>{ try{parkEntry(o.id);}catch(e){} });
       gL.appendChild(nameEl);
     }
