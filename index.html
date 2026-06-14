@@ -586,6 +586,9 @@
     border-radius:var(--radius-sm);
     padding:6px;
     margin-bottom:10px;
+    max-height:160px;
+    overflow-y:auto;
+    scrollbar-width:thin;
   }
   .picker button{
     aspect-ratio:1;
@@ -605,6 +608,40 @@
     border-radius:6px;cursor:pointer;font-family:inherit;
   }
   .picker-tab.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+  /* Parked entries strip (below clock header) */
+  .parked-strip{
+    display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;
+    padding:7px 14px;
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+    scrollbar-width:thin;
+  }
+  .parked-strip.hidden{display:none}
+  .parked-chip{
+    display:flex;align-items:center;gap:5px;
+    padding:5px 11px;flex-shrink:0;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:20px;cursor:pointer;
+    font-size:13px;color:var(--ink-2);
+    transition:border-color .15s,color .15s;
+    white-space:nowrap;
+  }
+  .parked-chip:hover{border-color:var(--ok);color:var(--ok)}
+  .parked-chip-name{font-size:11px;max-width:70px;overflow:hidden;text-overflow:ellipsis}
+
+  /* Parked entry row in tracker list */
+  .entry.parked{opacity:0.45}
+  .entry.parked .e-time{font-size:11px;color:var(--ink-3);font-style:italic}
+  .e-icon{cursor:pointer;position:relative}
+  .e-icon:hover::after{
+    content:'↩';position:absolute;top:-4px;right:-4px;
+    font-size:9px;background:var(--accent-soft);color:var(--accent);
+    border-radius:50%;width:12px;height:12px;
+    display:flex;align-items:center;justify-content:center;
+    line-height:1;
+  }
+  .entry.parked .e-icon:hover::after{content:'▶';background:var(--ok-soft,#2a3d2a);color:var(--ok)}
 
   .tracker-controls{
     display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap;
@@ -944,6 +981,9 @@
       <div class="date" id="dt">—</div>
     </div>
   </header>
+
+  <!-- ===== Parked entries quick-tap strip ===== -->
+  <div class="parked-strip hidden" id="parked-strip" aria-label="Saved individuals — tap to restart timer"></div>
 
   <!-- ===== Tabs ===== -->
   <div class="tabs-wrap" id="tabs-wrap">
@@ -1591,11 +1631,15 @@ function svgE(tag,attrs,text){
 }
 function ringColor(min,status,paused){
   if(paused) return '#5a5248';
-  if(min>=15) return '#d24a3a';
-  if(min>=5)  return '#e8a259';
-  return status==='in'?'#7fb069':'#d24a3a';
+  if(min>=15) return '#d24a3a'; // red
+  if(min>=5)  return '#e8a259'; // amber
+  return '#7fb069';              // always green under 5 min
 }
-function ringSW(min,paused){ return (!paused&&min>=10)?5:paused?2:3.5; }
+function ringSW(min,paused){
+  if(paused) return 2;
+  if(min>=20||min>=10) return 6; // thick
+  return 3.5;
+}
 function ringOp(min,paused){ return paused?0.35:min>=15?0.95:0.82; }
 function makeRingArc(cx,cy,r,frac,color,sw,op){
   const C=2*Math.PI*r;
@@ -1638,9 +1682,10 @@ function updateClockRings(){
   // trackerData is a let declared later in the script; guard against TDZ on first tick
   let td;
   try{ td=trackerData; }catch(e){ return; }
-  if(!td||!td.length) return;
+  const active=td?td.filter(o=>!o.parked):[];
+  if(!active.length) return;
   const RADII=[96,107,118,129];
-  td.slice(0,RADII.length).forEach((o,i)=>{
+  active.slice(0,RADII.length).forEach((o,i)=>{
     const r=RADII[i];
     const sec=elapsedSec(o), min=Math.floor(sec/60);
     const frac=Math.min(sec/(20*60),1);
@@ -1649,14 +1694,15 @@ function updateClockRings(){
     if(frac>0) gA.appendChild(makeRingArc(cx,cy,r,frac,color,ringSW(min,o.isPaused),ringOp(min,o.isPaused)));
     // Emoji + name label at arc leading edge (12 o'clock when not started)
     const ang=frac>0?-Math.PI/2+frac*2*Math.PI:-Math.PI/2;
-    const lx=cx+(r+13)*Math.cos(ang), ly=cy+(r+13)*Math.sin(ang);
-    gL.appendChild(svgE('text',{x:lx,y:ly+3,'text-anchor':'middle',
-      'dominant-baseline':'middle','font-size':'12'},o.emoji));
+    const lx=cx+(r+16)*Math.cos(ang), ly=cy+(r+16)*Math.sin(ang);
+    gL.appendChild(svgE('text',{x:lx,y:ly+4,'text-anchor':'middle',
+      'dominant-baseline':'middle','font-size':'16'},o.emoji));
     if(o.name){
-      const label=o.name.length>8?o.name.slice(0,7)+'…':o.name;
-      const nx=cx+(r+26)*Math.cos(ang), ny=cy+(r+26)*Math.sin(ang);
+      const label=o.name.length>9?o.name.slice(0,8)+'…':o.name;
+      const nx=cx+(r+32)*Math.cos(ang), ny=cy+(r+32)*Math.sin(ang);
       gL.appendChild(svgE('text',{x:nx,y:ny,'text-anchor':'middle',
-        'dominant-baseline':'middle','font-size':'7',fill:color},label));
+        'dominant-baseline':'middle','font-size':'10',
+        fill:color,'font-weight':'600'},label));
     }
   });
 }
@@ -1726,7 +1772,7 @@ const EMOJIS={
 
 let trackerData=(loadStore().tracker||[]).map(o=>({
   // ensure new fields exist with safe defaults
-  isPaused:false,pausedAt:0,elapsedPaused:0,
+  isPaused:false,pausedAt:0,elapsedPaused:0,parked:false,
   ...o
 }));
 function saveTracker(){saveStore({tracker:trackerData})}
@@ -1756,7 +1802,7 @@ function addEntry(emoji){
   const obj={
     id:uid(), emoji,
     name:'', badge:'', status:'out', category:'parent', notes:'',
-    startTime:Date.now(), elapsedPaused:0, pausedAt:0, isPaused:false,
+    startTime:Date.now(), elapsedPaused:0, pausedAt:0, isPaused:false, parked:false,
     created:new Date().toISOString()
   };
   trackerData.push(obj);
@@ -1785,25 +1831,51 @@ function fmt(sec){
   return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }
 
+function renderParkedStrip(){
+  const strip=document.getElementById('parked-strip');
+  const parked=trackerData.filter(o=>o.parked);
+  if(!parked.length){strip.classList.add('hidden');strip.innerHTML='';return;}
+  strip.classList.remove('hidden');
+  strip.innerHTML=parked.map(o=>`
+    <button class="parked-chip" data-id="${o.id}" title="Tap to restart timer for ${o.name||o.emoji}">
+      <span>${o.emoji}</span>
+      <span class="parked-chip-name">${o.name||'—'}</span>
+    </button>`).join('');
+  strip.querySelectorAll('.parked-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>unparkEntry(btn.dataset.id));
+  });
+}
+
+function parkEntry(id){
+  const o=trackerData.find(x=>x.id===id); if(!o) return;
+  o.parked=true; o.isPaused=false; o.pausedAt=0;
+  saveTracker(); renderTracker(); renderParkedStrip();
+}
+function unparkEntry(id){
+  const o=trackerData.find(x=>x.id===id); if(!o) return;
+  o.parked=false; o.startTime=Date.now(); o.elapsedPaused=0; o.isPaused=false; o.pausedAt=0;
+  saveTracker(); renderTracker(); renderParkedStrip();
+}
+
 function renderTracker(){
   const list=document.getElementById('tracker-list');
   if(!trackerData.length){
     list.innerHTML='<div class="empty">No entries yet — pick an emoji above to start tracking.</div>';
+    renderParkedStrip();
     return;
   }
   const search=document.getElementById('search').value.toLowerCase().trim();
   const fStatus=document.getElementById('filter-status').value;
   list.innerHTML=trackerData.map(o=>{
     const sec=elapsedSec(o), min=Math.floor(sec/60);
-    const cls=timerClass(min,o.isPaused);
+    const cls=o.parked?'':timerClass(min,o.isPaused);
     let visible=true;
-    if(search){
-      visible=(o.name+' '+o.badge+' '+o.notes).toLowerCase().includes(search);
-    }
+    if(search) visible=(o.name+' '+o.badge+' '+o.notes).toLowerCase().includes(search);
     if(fStatus!=='all'&&visible) visible=o.status===fStatus;
+    const timeLabel=o.parked?'returned':o.isPaused?'PAUSE':fmt(sec);
     return `
-      <div class="entry${visible?'':' filtered'}" data-id="${o.id}">
-        <div class="e-icon">
+      <div class="entry${o.parked?' parked':''}${visible?'':' filtered'}" data-id="${o.id}">
+        <div class="e-icon" data-park="${o.id}" title="${o.parked?'Tap to restart':'Tap to mark returned'}">
           ${o.emoji}
           <span class="e-dot ${o.status}"></span>
         </div>
@@ -1811,12 +1883,20 @@ function renderTracker(){
           <div class="e-name${o.name?'':' empty'}">${o.name||'Unassigned'}</div>
           <div class="e-meta">${o.category}${o.badge?' · #'+o.badge:''}</div>
         </div>
-        <div class="e-time mono ${cls}">${o.isPaused?'PAUSE':fmt(sec)}</div>
+        <div class="e-time mono ${cls}">${timeLabel}</div>
       </div>`;
   }).join('');
   list.querySelectorAll('.entry').forEach(el=>{
+    // Emoji icon click → park / unpark; row click → modal
+    el.querySelector('.e-icon').addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const o=trackerData.find(x=>x.id===el.dataset.id);
+      if(o.parked) unparkEntry(el.dataset.id);
+      else parkEntry(el.dataset.id);
+    });
     el.addEventListener('click',()=>openModal(el.dataset.id));
   });
+  renderParkedStrip();
 }
 
 // Update timers every second
