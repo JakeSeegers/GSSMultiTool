@@ -1695,14 +1695,19 @@ function updateClockRings(){
     // Emoji + name label at arc leading edge (12 o'clock when not started)
     const ang=frac>0?-Math.PI/2+frac*2*Math.PI:-Math.PI/2;
     const lx=cx+(r+16)*Math.cos(ang), ly=cy+(r+16)*Math.sin(ang);
-    gL.appendChild(svgE('text',{x:lx,y:ly+4,'text-anchor':'middle',
-      'dominant-baseline':'middle','font-size':'16'},o.emoji));
+    const emojiEl=svgE('text',{x:lx,y:ly+4,'text-anchor':'middle',
+      'dominant-baseline':'middle','font-size':'16',
+      style:'cursor:pointer',title:'Tap to mark returned: '+(o.name||o.emoji)},o.emoji);
+    emojiEl.addEventListener('click',()=>{ try{parkEntry(o.id);}catch(e){} });
+    gL.appendChild(emojiEl);
     if(o.name){
       const label=o.name.length>9?o.name.slice(0,8)+'…':o.name;
       const nx=cx+(r+32)*Math.cos(ang), ny=cy+(r+32)*Math.sin(ang);
-      gL.appendChild(svgE('text',{x:nx,y:ny,'text-anchor':'middle',
+      const nameEl=svgE('text',{x:nx,y:ny,'text-anchor':'middle',
         'dominant-baseline':'middle','font-size':'10',
-        fill:color,'font-weight':'600'},label));
+        fill:color,'font-weight':'600',style:'cursor:pointer'},label);
+      nameEl.addEventListener('click',()=>{ try{parkEntry(o.id);}catch(e){} });
+      gL.appendChild(nameEl);
     }
   });
 }
