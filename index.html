@@ -950,6 +950,103 @@
   .settings-import-msg.ok{color:var(--ok)}
   .settings-import-msg.err{color:var(--danger)}
 
+  /* ====== SUPPLIES ORDERING PANE ====== */
+  .sup-catalog-link{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:10px;font-weight:700;letter-spacing:.5px;
+    color:var(--accent);text-decoration:none;
+    margin-bottom:12px;
+  }
+  .sup-catalog-link:hover{text-decoration:underline}
+  .sup-top-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .sup-field{flex:1;min-width:140px}
+  .sup-field label{
+    display:block;font-size:10px;font-weight:700;
+    letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--ink-3);margin-bottom:4px;
+  }
+  .sup-field select,.sup-field input{
+    width:100%;background:var(--bg);
+    border:1px solid var(--line);color:var(--ink);
+    padding:8px 9px;border-radius:6px;
+    font-family:inherit;font-size:13px;
+  }
+  .sup-field select:focus,.sup-field input:focus{outline:none;border-color:var(--accent)}
+  .sup-list{
+    display:flex;flex-direction:column;gap:6px;
+    max-height:260px;overflow-y:auto;
+    margin-bottom:12px;
+    scrollbar-width:thin;
+  }
+  .sup-list::-webkit-scrollbar{width:4px}
+  .sup-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
+  .sup-item{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    transition:border-color .15s;
+  }
+  .sup-item.has-qty{border-color:var(--accent)}
+  .sup-item-info{flex:1;min-width:0}
+  .sup-item-name{font-size:12px;font-weight:700;color:var(--ink);line-height:1.35}
+  .sup-item-code{font-size:10px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;margin-top:1px}
+  .sup-qty{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .sup-qty-btn{
+    width:26px;height:26px;flex-shrink:0;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink-2);
+    border-radius:6px;font-size:14px;font-family:inherit;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+    transition:all .15s;
+  }
+  .sup-qty-btn:hover{background:var(--line);color:var(--ink)}
+  .sup-qty-input{
+    width:42px;text-align:center;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    padding:5px 2px;border-radius:6px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  .sup-qty-input:focus{outline:none;border-color:var(--accent)}
+  .sup-nonstock{
+    border:1px dashed var(--line-2);
+    border-radius:var(--radius-sm);
+    padding:10px;margin-bottom:14px;
+  }
+  .sup-nonstock-head{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .sup-nonstock-row{display:flex;gap:6px;margin-bottom:6px}
+  .sup-nonstock-row input[type="text"]{flex:1;min-width:0}
+  .sup-nonstock-row input[type="number"]{width:56px;flex-shrink:0}
+  .sup-nonstock-row input{
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    padding:7px 8px;border-radius:6px;font-family:inherit;font-size:12px;
+  }
+  .sup-nonstock-row input:focus{outline:none;border-color:var(--accent)}
+  .sup-nonstock-list{display:flex;flex-direction:column;gap:4px}
+  .sup-nonstock-item{
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;color:var(--ink-2);
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:6px;padding:5px 8px;
+  }
+  .sup-nonstock-item .n-text{flex:1;min-width:0}
+  .sup-nonstock-item .n-del{background:transparent;border:none;color:var(--ink-3);cursor:pointer;font-size:14px;line-height:1;padding:0 2px}
+  .sup-nonstock-item .n-del:hover{color:var(--danger)}
+  .sup-output-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .sup-output-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3)}
+  .sup-output{
+    width:100%;box-sizing:border-box;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;
+    padding:10px;border-radius:6px;
+    min-height:200px;resize:vertical;
+  }
+  .sup-output:focus{outline:none;border-color:var(--accent)}
+  .sup-copy-msg{font-size:11px;margin-top:6px;min-height:14px;color:var(--ok)}
+
   /* ====== Accessibility ====== */
   @media (prefers-reduced-motion:reduce){
     *{transition:none !important;animation:none !important}
@@ -998,6 +1095,7 @@
       <button class="tab" role="tab" aria-selected="false" data-target="protips">ProTips</button>
       <button class="tab" role="tab" aria-selected="false" data-target="fto">FTO</button>
       <button class="tab" role="tab" aria-selected="false" data-target="vr">VR List<span class="count hidden" id="vr-count">0</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-target="supplies">Supplies</button>
       <button class="tab" role="tab" aria-selected="false" data-target="movement">Focus Timer</button>
       <button class="tab" role="tab" aria-selected="false" data-target="misc">Misc</button>
       <button class="tab" role="tab" aria-selected="false" data-target="settings">⚙</button>
@@ -1190,6 +1288,61 @@
       <strong style="color:var(--ink-2)">Tips:</strong>
       Click a row to delete · Shift-click to toggle confidential · Alt-click to cycle danger level (none → elevated → high)
     </div>
+  </section>
+
+  <!-- ===== Pane: Supplies Ordering ===== -->
+  <section class="pane" data-pane="supplies" role="tabpanel" aria-hidden="true">
+    <a class="sup-catalog-link" href="https://scscada.med.umich.edu/cada/ItemCatalog/ItemCatalogSearch?currentpage=2" target="_blank" rel="noopener">Item Catalog (look up codes) ↗</a>
+
+    <div class="sup-top-row">
+      <div class="sup-field">
+        <label for="sup-dept">Ordering as / deliver to</label>
+        <select id="sup-dept">
+          <option value="picu-host">PICU Host — Desk 10-243</option>
+          <option value="picu-clerk">PICU Clerk — Desk 10-243</option>
+          <option value="pctu-clerk">PCTU Clerk — Desk 10-211</option>
+        </select>
+      </div>
+      <div class="sup-field">
+        <label for="sup-recipient">Greeting ("Hi ___,")</label>
+        <input type="text" id="sup-recipient" placeholder="Supply Chain Team" maxlength="60">
+      </div>
+    </div>
+
+    <div class="sup-list" id="sup-list"></div>
+
+    <div class="sup-nonstock">
+      <div class="sup-nonstock-head">Non-Stock Item (needs supervisor approval)</div>
+      <div class="sup-nonstock-row">
+        <input type="text" id="sup-ns-name" placeholder="Item name / description" maxlength="120">
+        <input type="number" id="sup-ns-qty" placeholder="Qty" min="1" value="1" inputmode="numeric">
+        <button class="btn sm primary" id="sup-ns-add">Add</button>
+      </div>
+      <div class="sup-nonstock-list" id="sup-ns-list"></div>
+    </div>
+
+    <div class="sup-output-head">
+      <div class="sup-output-label">Email Draft</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn sm" id="sup-copy">Copy</button>
+        <button class="btn sm danger" id="sup-reset">Reset</button>
+      </div>
+    </div>
+    <textarea class="sup-output" id="sup-output" spellcheck="false" readonly></textarea>
+    <div class="sup-copy-msg" id="sup-copy-msg"></div>
+
+    <details class="expand" style="margin-top:12px">
+      <summary>Ordering notes</summary>
+      <div class="body">
+        <ul>
+          <li>Consider dividing orders between <strong>PICU Host/Clerk</strong> and <strong>PCTU Clerk</strong> — helps with financial and logistical tracking.</li>
+          <li>PCTU Clerk desk is <strong>10-211</strong> if items need to be delivered there.</li>
+          <li><strong>Non-stock items</strong> need a supervisor's approval before ordering.</li>
+          <li>Clerks/Hosts can call supply chain <strong>7–10</strong>; otherwise use the paging system.</li>
+          <li>Call supply chain at <strong>936-4029</strong> or email <strong>MS-CSR-STAFF@med.umich.edu</strong>. Include your department ordering code.</li>
+        </ul>
+      </div>
+    </details>
   </section>
 
   <!-- ===== Pane: Movement Reminder ===== -->
@@ -2684,6 +2837,177 @@ document.querySelector('.tab[data-target="misc"]').addEventListener('click',()=>
 document.querySelectorAll('.tab[data-target]').forEach(t=>{
   if(t.dataset.target!=='misc') t.addEventListener('click',stopTimer);
 });
+
+/* =======================================================
+   9) SUPPLIES ORDERING
+   ======================================================= */
+(function(){
+  const SUPPLY_ITEMS=[
+    {code:'46218',name:'MASK, SLEEP'},
+    {code:'1074',name:'SOAP, BAR DEODORANT WRAPPED 1.5OZ'},
+    {code:'2537',name:'LOTION, BODY REMEDY ESSENTIALS'},
+    {code:'2629',name:'SHAMPOO, 2OZ'},
+    {code:'1049',name:'TOOTHBRUSH, ADULT'},
+    {code:'1056',name:'TOOTHPASTE, FLUORIDE MINT FLAVORED .6OZ'},
+    {code:'91222',name:'LOTION, TEXTURED HAIR 4OZ'},
+    {code:'91217',name:'PICK, HAIR'},
+    {code:'91220',name:'SHAMPOO, TEXTURED HAIR CANTU 2OZ'},
+    {code:'91219',name:'DETANGLER, TEXTURED HAIR CANTU 6OZ'},
+    {code:'91221',name:'CONDITIONER, TEXTURED HAIR CANTU 2OZ'},
+    {code:'1061',name:'MOUTHWASH, NONALCOHOLIC CORINZ 1.5OZ'},
+    {code:'40845',name:'EAR PLUGS, TAPERFIT'}
+  ];
+  const DEPTS={
+    'picu-host':{desk:'Floor Ten GSS Desk 10-243'},
+    'picu-clerk':{desk:'Floor Ten GSS Desk 10-243'},
+    'pctu-clerk':{desk:'PCTU Clerk Desk 10-211'}
+  };
+
+  let sup=loadStore().supplies||{};
+  if(!sup.dept) sup.dept='picu-host';
+  if(!sup.recipient) sup.recipient='';
+  if(!sup.qty) sup.qty={};
+  if(!sup.nonstock) sup.nonstock=[];
+
+  function saveSup(){saveStore({supplies:sup})}
+  function nsUID(){return 'n'+Math.random().toString(36).slice(2,9)}
+
+  function renderItems(){
+    const list=document.getElementById('sup-list');
+    list.innerHTML=SUPPLY_ITEMS.map(it=>{
+      const q=sup.qty[it.code]||0;
+      return `<div class="sup-item${q>0?' has-qty':''}" data-code="${it.code}">
+        <div class="sup-item-info">
+          <div class="sup-item-name">${escapeHtml(it.name)}</div>
+          <div class="sup-item-code">Code ${it.code}</div>
+        </div>
+        <div class="sup-qty">
+          <button class="sup-qty-btn" data-code="${it.code}" data-dir="-1" aria-label="Decrease ${escapeHtml(it.name)}">−</button>
+          <input type="number" class="sup-qty-input" data-code="${it.code}" min="0" value="${q}" inputmode="numeric">
+          <button class="sup-qty-btn" data-code="${it.code}" data-dir="1" aria-label="Increase ${escapeHtml(it.name)}">+</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.sup-qty-btn').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const code=b.dataset.code, dir=parseInt(b.dataset.dir,10);
+        const cur=sup.qty[code]||0;
+        setQty(code,Math.max(0,cur+dir));
+      });
+    });
+    list.querySelectorAll('.sup-qty-input').forEach(inp=>{
+      inp.addEventListener('input',()=>{
+        const v=Math.max(0,parseInt(inp.value,10)||0);
+        setQty(inp.dataset.code,v,false);
+      });
+      inp.addEventListener('blur',renderItems);
+    });
+  }
+
+  function setQty(code,val,rerender){
+    if(val>0) sup.qty[code]=val; else delete sup.qty[code];
+    saveSup();
+    if(rerender!==false) renderItems();
+    buildEmail();
+  }
+
+  function renderNonstock(){
+    const list=document.getElementById('sup-ns-list');
+    if(!sup.nonstock.length){ list.innerHTML=''; return; }
+    list.innerHTML=sup.nonstock.map(ns=>`
+      <div class="sup-nonstock-item" data-id="${ns.id}">
+        <span class="n-text">${escapeHtml(ns.name)} × ${ns.qty}</span>
+        <button class="n-del" data-id="${ns.id}" aria-label="Remove">×</button>
+      </div>`).join('');
+    list.querySelectorAll('.n-del').forEach(b=>b.addEventListener('click',()=>{
+      sup.nonstock=sup.nonstock.filter(n=>n.id!==b.dataset.id);
+      saveSup(); renderNonstock(); buildEmail();
+    }));
+  }
+
+  function buildEmail(){
+    const dept=DEPTS[sup.dept]||DEPTS['picu-host'];
+    const recipient=(sup.recipient||'').trim();
+    const parts=[];
+    SUPPLY_ITEMS.forEach(it=>{
+      const q=sup.qty[it.code]||0;
+      if(q>0) parts.push(it.code+' x '+q);
+    });
+    const nonstockParts=sup.nonstock.filter(n=>n.qty>0).map(n=>n.name+' x '+n.qty);
+    const allParts=parts.concat(nonstockParts);
+
+    const lines=[];
+    lines.push('Hi '+(recipient||'[Name]')+',');
+    lines.push('');
+    lines.push('We require the following items to be delivered as visitor amenities to the '+dept.desk+'.');
+    lines.push('');
+    lines.push(allParts.length?allParts.join(', '):'[select items above]');
+    lines.push('');
+    lines.push('You can either call supply chain at 936-4029 or email MS-CSR-STAFF@med.umich.edu. Please include your department ordering code.');
+    if(nonstockParts.length){
+      lines.push('');
+      lines.push("Note: the following are non-stock items and will need a supervisor's approval — "+nonstockParts.join(', ')+'.');
+    }
+    lines.push('');
+    lines.push('Thank you.');
+    document.getElementById('sup-output').value=lines.join('\n');
+  }
+
+  document.getElementById('sup-dept').addEventListener('change',e=>{
+    sup.dept=e.target.value; saveSup(); buildEmail();
+  });
+  document.getElementById('sup-recipient').addEventListener('input',e=>{
+    sup.recipient=e.target.value; saveSup(); buildEmail();
+  });
+
+  document.getElementById('sup-ns-add').addEventListener('click',()=>{
+    const nameInp=document.getElementById('sup-ns-name');
+    const qtyInp=document.getElementById('sup-ns-qty');
+    const name=nameInp.value.trim();
+    const qty=Math.max(1,parseInt(qtyInp.value,10)||1);
+    if(!name) return;
+    sup.nonstock.push({id:nsUID(),name,qty});
+    nameInp.value=''; qtyInp.value='1';
+    saveSup(); renderNonstock(); buildEmail();
+    nameInp.focus();
+  });
+  document.getElementById('sup-ns-name').addEventListener('keydown',e=>{
+    if(e.key==='Enter') document.getElementById('sup-ns-add').click();
+  });
+
+  document.getElementById('sup-copy').addEventListener('click',()=>{
+    const out=document.getElementById('sup-output');
+    const msg=document.getElementById('sup-copy-msg');
+    const done=()=>{msg.textContent='✓ Copied to clipboard.'; setTimeout(()=>{msg.textContent=''},2500)};
+    const fallback=()=>{
+      out.removeAttribute('readonly'); out.focus(); out.select();
+      try{document.execCommand('copy'); done();}
+      catch(e){msg.textContent='Copy failed — select and copy manually.'}
+      out.setAttribute('readonly','');
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(out.value).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  document.getElementById('sup-reset').addEventListener('click',()=>{
+    sup={dept:'picu-host',recipient:'',qty:{},nonstock:[]};
+    saveSup();
+    document.getElementById('sup-dept').value=sup.dept;
+    document.getElementById('sup-recipient').value='';
+    renderItems(); renderNonstock(); buildEmail();
+    document.getElementById('sup-copy-msg').textContent='';
+  });
+
+  // init
+  document.getElementById('sup-dept').value=sup.dept;
+  document.getElementById('sup-recipient').value=sup.recipient;
+  renderItems();
+  renderNonstock();
+  buildEmail();
+})();
 </script>
 </body>
 </html>
