@@ -1539,6 +1539,7 @@
    0) STORAGE
    ======================================================= */
 const STORE_KEY='shiftConsole.v1';
+const BUILD_STAMP='2026-08-09b'; // bump on deploy to verify Pages picked up the latest push
 function loadStore(){
   try{
     const raw=localStorage.getItem(STORE_KEY);
@@ -2648,7 +2649,7 @@ calcFTO();
     const d=s.editionDate?new Date(s.editionDate).toLocaleDateString('en-US',
       {weekday:'short',year:'numeric',month:'short',day:'numeric'}):'—';
     document.getElementById('settings-edition-date').textContent='Since '+d;
-    document.getElementById('settings-store-key').textContent='store: '+STORE_KEY;
+    document.getElementById('settings-store-key').textContent='store: '+STORE_KEY+' · build '+BUILD_STAMP;
   }
 
   document.getElementById('settings-bump').addEventListener('click',()=>{
