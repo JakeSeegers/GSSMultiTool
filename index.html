@@ -1010,6 +1010,8 @@
     transition:all .15s;
   }
   .sup-qty-btn:hover{background:var(--line);color:var(--ink)}
+  .sup-qty-btn:disabled{opacity:.35;cursor:not-allowed}
+  .sup-qty-btn:disabled:hover{background:var(--bg);color:var(--ink-2)}
   .sup-qty-input{
     width:42px;text-align:center;
     background:var(--bg);border:1px solid var(--line);color:var(--ink);
@@ -2866,7 +2868,9 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
     {code:'91219',name:'DETANGLER, TEXTURED HAIR CANTU 6OZ'},
     {code:'91221',name:'CONDITIONER, TEXTURED HAIR CANTU 2OZ'},
     {code:'1061',name:'MOUTHWASH, NONALCOHOLIC CORINZ 1.5OZ'},
-    {code:'40845',name:'EAR PLUGS, TAPERFIT'}
+    {code:'40845',name:'EAR PLUGS, TAPERFIT',max:1},
+    {code:'74599',name:'LIP BALM'},
+    {code:'11169',name:'BREAST SHELL'}
   ];
   const DEPTS={
     'picu-host':{desk:'Floor Ten GSS Desk 10-243'},
@@ -2887,15 +2891,16 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
     const list=document.getElementById('sup-list');
     list.innerHTML=SUPPLY_ITEMS.map(it=>{
       const q=sup.qty[it.code]||0;
+      const atMax=it.max!=null&&q>=it.max;
       return `<div class="sup-item${q>0?' has-qty':''}" data-code="${it.code}">
         <div class="sup-item-info">
           <div class="sup-item-name">${escapeHtml(it.name)}</div>
-          <div class="sup-item-code">Code ${it.code}</div>
+          <div class="sup-item-code">Code ${it.code}${it.max!=null?' · max '+it.max:''}</div>
         </div>
         <div class="sup-qty">
           <button class="sup-qty-btn" data-code="${it.code}" data-dir="-1" aria-label="Decrease ${escapeHtml(it.name)}">−</button>
-          <input type="number" class="sup-qty-input" data-code="${it.code}" min="0" value="${q}" inputmode="numeric">
-          <button class="sup-qty-btn" data-code="${it.code}" data-dir="1" aria-label="Increase ${escapeHtml(it.name)}">+</button>
+          <input type="number" class="sup-qty-input" data-code="${it.code}" min="0"${it.max!=null?' max="'+it.max+'"':''} value="${q}" inputmode="numeric">
+          <button class="sup-qty-btn" data-code="${it.code}" data-dir="1" aria-label="Increase ${escapeHtml(it.name)}"${atMax?' disabled':''}>+</button>
         </div>
       </div>`;
     }).join('');
@@ -2916,6 +2921,8 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
   }
 
   function setQty(code,val,rerender){
+    const item=SUPPLY_ITEMS.find(i=>i.code===code);
+    if(item&&item.max!=null) val=Math.min(val,item.max);
     if(val>0) sup.qty[code]=val; else delete sup.qty[code];
     saveSup();
     if(rerender!==false) renderItems();
