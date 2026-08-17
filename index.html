@@ -7,8 +7,44 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+// Apply saved contrast mode before first paint to avoid a flash of the wrong theme.
+(function(){
+  try{
+    var raw=localStorage.getItem('shiftConsole.v1');
+    var mode='normal';
+    if(raw){
+      var s=JSON.parse(raw);
+      if(s && s.settings && s.settings.contrastMode) mode=s.settings.contrastMode;
+    }
+    document.documentElement.setAttribute('data-contrast',mode);
+  }catch(e){}
+})();
+</script>
 <style>
   :root{
+    /* "Standard" contrast — the default. Brighter secondary text than the
+       original dim-gray-on-dim-gray look; see [data-contrast] overrides below
+       for "Classic" (the original look) and "Ultra" (max contrast). */
+    --bg:#13110f;
+    --panel:#1e1c19;
+    --panel-2:#252220;
+    --line:#3d3833;
+    --line-2:#4d473f;
+    --ink:#faf7f2;
+    --ink-2:#d8cebd;
+    --ink-3:#a89e8f;
+    --accent:#f0ac66;
+    --accent-soft:#3a2c1a;
+    --warn:#f0ac66;
+    --warn-2:#e07a4a;
+    --danger:#e2594a;
+    --ok:#8ec278;
+    --radius:14px;
+    --radius-sm:8px;
+  }
+  /* "Classic" — the original dim palette, kept for anyone who prefers it. */
+  html[data-contrast="classic"]{
     --bg:#13110f;
     --panel:#1c1a17;
     --panel-2:#221f1b;
@@ -18,13 +54,26 @@
     --ink-2:#bdb3a4;
     --ink-3:#7a7166;
     --accent:#e8a259;
-    --accent-soft:#3a2c1a;
     --warn:#e8a259;
     --warn-2:#d96a3a;
     --danger:#d24a3a;
     --ok:#7fb069;
-    --radius:14px;
-    --radius-sm:8px;
+  }
+  /* "Ultra High-Vis" — near-max contrast for bright rooms / quick glances. */
+  html[data-contrast="ultra"]{
+    --bg:#000000;
+    --panel:#000000;
+    --panel-2:#0a0a0a;
+    --line:#666666;
+    --line-2:#999999;
+    --ink:#ffffff;
+    --ink-2:#f2f2f2;
+    --ink-3:#d0d0d0;
+    --accent:#ffcc66;
+    --warn:#ffcc66;
+    --warn-2:#ff8f5c;
+    --danger:#ff6b57;
+    --ok:#8fe070;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -949,6 +998,7 @@
   }
   .settings-import-msg.ok{color:var(--ok)}
   .settings-import-msg.err{color:var(--danger)}
+  .contrast-opt.active{background:var(--accent);border-color:var(--accent);color:#1a1612}
 
   /* ====== SUPPLIES ORDERING PANE ====== */
   .sup-catalog-link{
@@ -1454,6 +1504,16 @@
 
   <!-- ===== Pane: Settings ===== -->
   <section class="pane" data-pane="settings" role="tabpanel" aria-hidden="true">
+    <div class="settings-block">
+      <div class="settings-label">Text Visibility</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:8px">Standard is the default — brighter than the original look and easier to read. Classic brings back the original dim look. Ultra High-Vis maximizes contrast for bright rooms or quick glances.</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap" id="contrast-options">
+        <button class="btn sm contrast-opt" data-contrast="classic">Classic</button>
+        <button class="btn sm contrast-opt" data-contrast="normal">Standard</button>
+        <button class="btn sm contrast-opt" data-contrast="ultra">Ultra High-Vis</button>
+      </div>
+    </div>
+    <div class="sep"></div>
     <div class="settings-block">
       <div class="settings-label">Edition</div>
       <div class="settings-edition" id="settings-edition">—</div>
@@ -2694,10 +2754,26 @@ calcFTO();
     schedMsg.className='settings-import-msg ok';
   });
 
+  // Text visibility / contrast mode
+  function applyContrast(mode){
+    document.documentElement.setAttribute('data-contrast',mode);
+    document.querySelectorAll('.contrast-opt').forEach(function(b){
+      b.classList.toggle('active',b.dataset.contrast===mode);
+    });
+  }
+  document.getElementById('contrast-options').addEventListener('click',(e)=>{
+    const btn=e.target.closest('.contrast-opt');
+    if(!btn) return;
+    const mode=btn.dataset.contrast;
+    saveSettings({contrastMode:mode});
+    applyContrast(mode);
+  });
+
   // Init: set edition 1 if none saved
   const s=loadSettings();
   if(!s.edition) saveSettings({edition:1,editionDate:new Date().toISOString()});
   renderSettings();
+  applyContrast(s.contrastMode||'normal');
 })();
 
 /* =======================================================
@@ -2706,7 +2782,7 @@ calcFTO();
 const LAT=42.28, LON=-83.74;
 
 function setBody(el,html){el.classList.remove('loading');el.innerHTML=html}
-function setErr(el,label){el.classList.remove('loading');el.innerHTML='<div style="color:#7a7166;font-size:11px">Could not load '+label+'. Try again later.</div>'}
+function setErr(el,label){el.classList.remove('loading');el.innerHTML='<div style="color:var(--ink-3);font-size:11px">Could not load '+label+'. Try again later.</div>'}
 
 function wxCode(c){
   const m={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',48:'Foggy',51:'Light Drizzle',53:'Drizzle',55:'Heavy Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',75:'Heavy Snow',80:'Showers',81:'Showers',82:'Heavy Showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
