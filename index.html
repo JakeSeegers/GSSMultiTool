@@ -42,6 +42,14 @@
     --warn-2:#e07a4a;
     --danger:#ee6d54;
     --ok:#8ec278;
+    /* Unit colors — deliberately distinct hues, used on the VR row itself
+       (not just the category header) so a unit reads at a glance.
+       PCTU Bay used to reuse the same orange as --accent; separated to teal
+       so it isn't just "the highlight color." */
+    --picu:#5aa3ee;
+    --pctu:#c87aff;
+    --pctubay:#2dd4bf;
+    --nicu:#6fd66f;
     --radius:14px;
     --radius-sm:8px;
   }
@@ -76,6 +84,10 @@
     --warn-2:#ff8f5c;
     --danger:#ff6b57;
     --ok:#8fe070;
+    --picu:#7ec4ff;
+    --pctu:#dd9dff;
+    --pctubay:#4de8d4;
+    --nicu:#8ce88c;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -436,10 +448,10 @@
     border:1px solid var(--line);border-radius:5px;
     margin-left:auto;
   }
-  .vr-room-preview.picu{color:#6ba3e0;border-color:#3a4a60}
-  .vr-room-preview.pctu{color:#c87aff;border-color:#4a3a60}
-  .vr-room-preview.pctubay{color:#e8a259;border-color:#5a3f1f}
-  .vr-room-preview.nicu{color:#7fb069;border-color:#3a5a35}
+  .vr-room-preview.picu{color:var(--picu);border-color:var(--picu)}
+  .vr-room-preview.pctu{color:var(--pctu);border-color:var(--pctu)}
+  .vr-room-preview.pctubay{color:var(--pctubay);border-color:var(--pctubay)}
+  .vr-room-preview.nicu{color:var(--nicu);border-color:var(--nicu)}
 
   .vr-toggle{
     display:inline-flex;align-items:center;gap:5px;
@@ -469,10 +481,10 @@
     letter-spacing:1.5px;text-transform:uppercase;
     color:var(--ink-2);
   }
-  .vr-cat-head.picu{border-left-color:#6ba3e0;color:#6ba3e0}
-  .vr-cat-head.pctu{border-left-color:#c87aff;color:#c87aff}
-  .vr-cat-head.pctubay{border-left-color:#e8a259;color:#e8a259}
-  .vr-cat-head.nicu{border-left-color:#7fb069;color:#7fb069}
+  .vr-cat-head.picu{border-left-color:var(--picu);color:var(--picu)}
+  .vr-cat-head.pctu{border-left-color:var(--pctu);color:var(--pctu)}
+  .vr-cat-head.pctubay{border-left-color:var(--pctubay);color:var(--pctubay)}
+  .vr-cat-head.nicu{border-left-color:var(--nicu);color:var(--nicu)}
   .vr-cat-count{font-family:'JetBrains Mono',monospace;color:var(--ink-3);font-size:10px}
 
   .vr-cat-body{
@@ -485,24 +497,43 @@
     padding:8px 10px;
     background:var(--panel-2);
     border-top:1px solid var(--line);
+    border-left:4px solid transparent;
     cursor:pointer;
-    transition:background .15s;
+    transition:background .15s,filter .15s;
   }
   .vr-cat-body .vr-row:first-child{border-top:none}
-  .vr-row:hover{background:#2a2520}
+  .vr-row:hover{filter:brightness(1.18)}
+  /* Unit color on the row itself, not just the group header — a saturated
+     tinted background plus a solid color spine, so the unit reads without
+     needing to scroll up to the category header. */
+  .vr-row.cat-picu{background:color-mix(in srgb,var(--picu) 20%,var(--panel-2));border-left-color:var(--picu)}
+  .vr-row.cat-pctu{background:color-mix(in srgb,var(--pctu) 20%,var(--panel-2));border-left-color:var(--pctu)}
+  .vr-row.cat-pctubay{background:color-mix(in srgb,var(--pctubay) 20%,var(--panel-2));border-left-color:var(--pctubay)}
+  .vr-row.cat-nicu{background:color-mix(in srgb,var(--nicu) 20%,var(--panel-2));border-left-color:var(--nicu)}
+  /* Danger level takes over the row color — more urgent than the unit tint. */
+  .vr-row.danger-low{background:color-mix(in srgb,var(--accent) 26%,var(--panel-2));border-left-color:var(--accent);border-left-width:5px}
+  .vr-row.danger-high{background:color-mix(in srgb,var(--danger) 32%,var(--panel-2));border-left-color:var(--danger);border-left-width:6px}
+  .vr-row.danger-high .vr-name{font-size:15px;font-weight:700}
+  /* Confidential takes over everything — the highest-priority visual, a solid
+     block of color plus a hazard-stripe edge so it can't be mistaken for a
+     tinted row at a glance. */
   .vr-row.confidential{
     background:#d24a3a;
     color:#0a0606;
+    border-left-width:6px;
+    border-left-color:#0a0606;
+    background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.18) 0 8px,transparent 8px 16px);
   }
-  .vr-row.confidential:hover{background:#bf3e30}
-  .vr-row.confidential .vr-room{background:rgba(0,0,0,.25);color:#000}
+  .vr-row.confidential:hover{filter:brightness(1.08)}
+  .vr-row.confidential .vr-room{background:rgba(0,0,0,.3);color:#000}
   .vr-row.confidential .vr-name{color:#000}
   .vr-row.confidential .vr-notes{color:#2a0a05}
   .vr-row.confidential .vr-conf-tag{display:inline-block}
-  .vr-row.danger-low{border-left:3px solid var(--accent)}
-  .vr-row.danger-high .vr-name{font-size:15px;font-weight:700}
-  .vr-row.danger-high{border-left:3px solid var(--danger)}
-  .vr-row.danger-high.confidential{border-left-color:#0a0606}
+  .vr-row.danger-high.confidential{border-left-color:#000;animation:vrCritPulse 1.6s ease-in-out infinite}
+  @keyframes vrCritPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}
+    50%{box-shadow:inset 0 0 0 2px rgba(0,0,0,.5)}
+  }
 
   .vr-room{
     flex-shrink:0;
@@ -2507,7 +2538,7 @@ calcFTO();
   }
 
   function rowHTML(o,asClockAlert){
-    const cls=['vr-row'];
+    const cls=['vr-row','cat-'+o.cat];
     if(o.confidential) cls.push('confidential');
     if(o.danger==='low') cls.push('danger-low');
     if(o.danger==='high') cls.push('danger-high');
