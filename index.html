@@ -7,8 +7,54 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+// Apply saved contrast mode before first paint to avoid a flash of the wrong theme.
+(function(){
+  try{
+    var raw=localStorage.getItem('shiftConsole.v1');
+    var mode='normal', textSize='standard';
+    if(raw){
+      var s=JSON.parse(raw);
+      if(s && s.settings && s.settings.contrastMode) mode=s.settings.contrastMode;
+      if(s && s.settings && s.settings.textSize) textSize=s.settings.textSize;
+    }
+    document.documentElement.setAttribute('data-contrast',mode);
+    if(textSize!=='standard') document.documentElement.setAttribute('data-textsize',textSize);
+  }catch(e){}
+})();
+</script>
 <style>
   :root{
+    /* "Standard" contrast — the default. Brighter secondary text than the
+       original dim-gray-on-dim-gray look; see [data-contrast] overrides below
+       for "Classic" (the original look) and "Ultra" (max contrast). */
+    --bg:#13110f;
+    --panel:#1e1c19;
+    --panel-2:#252220;
+    --line:#3d3833;
+    --line-2:#4d473f;
+    --ink:#faf7f2;
+    --ink-2:#d8cebd;
+    --ink-3:#a89e8f;
+    --accent:#f0ac66;
+    --accent-soft:#3a2c1a;
+    --warn:#f0ac66;
+    --warn-2:#e07a4a;
+    --danger:#ee6d54;
+    --ok:#8ec278;
+    /* Unit colors — deliberately distinct hues, used on the VR row itself
+       (not just the category header) so a unit reads at a glance.
+       PCTU Bay used to reuse the same orange as --accent; separated to teal
+       so it isn't just "the highlight color." */
+    --picu:#5aa3ee;
+    --pctu:#c87aff;
+    --pctubay:#2dd4bf;
+    --nicu:#6fd66f;
+    --radius:14px;
+    --radius-sm:8px;
+  }
+  /* "Classic" — the original dim palette, kept for anyone who prefers it. */
+  html[data-contrast="classic"]{
     --bg:#13110f;
     --panel:#1c1a17;
     --panel-2:#221f1b;
@@ -18,16 +64,36 @@
     --ink-2:#bdb3a4;
     --ink-3:#7a7166;
     --accent:#e8a259;
-    --accent-soft:#3a2c1a;
     --warn:#e8a259;
     --warn-2:#d96a3a;
     --danger:#d24a3a;
     --ok:#7fb069;
-    --radius:14px;
-    --radius-sm:8px;
+  }
+  /* "Ultra High-Vis" — near-max contrast for bright rooms / quick glances. */
+  html[data-contrast="ultra"]{
+    --bg:#000000;
+    --panel:#000000;
+    --panel-2:#0a0a0a;
+    --line:#666666;
+    --line-2:#999999;
+    --ink:#ffffff;
+    --ink-2:#f2f2f2;
+    --ink-3:#d0d0d0;
+    --accent:#ffcc66;
+    --warn:#ffcc66;
+    --warn-2:#ff8f5c;
+    --danger:#ff6b57;
+    --ok:#8fe070;
+    --picu:#7ec4ff;
+    --pctu:#dd9dff;
+    --pctubay:#4de8d4;
+    --nicu:#8ce88c;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
+  /* Form placeholders default to a browser gray that ignores the theme —
+     pin them to --ink-3 so they respect Classic/Standard/Ultra like everything else. */
+  input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   body{
     font-family:'Atkinson Hyperlegible',system-ui,sans-serif;
     background:var(--bg);
@@ -61,12 +127,13 @@
 
   /* ===== Top: clock strip ===== */
   .clock-strip{
-    padding:18px 20px 14px;
+    padding:10px 14px 10px;
     border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:14px;
+    display:flex;align-items:center;gap:12px;
     background:linear-gradient(180deg,#1f1c18 0%,var(--panel) 100%);
+    overflow:visible;
   }
-  .ring{flex-shrink:0}
+  .ring{flex-shrink:0;overflow:visible}
   .time-block{display:flex;flex-direction:column;min-width:0;flex:1}
   .time-row{display:flex;align-items:baseline;gap:8px}
   .time{
@@ -235,7 +302,7 @@
     color:var(--ink-2);
   }
   .misc-body{padding:12px}
-  .misc-body.loading{color:var(--ink-3);font-size:12px;font-style:italic;text-align:center;padding:20px 12px}
+  .misc-body.loading{color:var(--ink-2);font-size:12px;font-style:italic;text-align:center;padding:20px 12px}
   .misc-body img{width:100%;max-height:200px;object-fit:cover;border-radius:6px;display:block;background:var(--bg)}
   .refresh-btn{
     background:transparent;border:1px solid var(--line);
@@ -381,10 +448,10 @@
     border:1px solid var(--line);border-radius:5px;
     margin-left:auto;
   }
-  .vr-room-preview.picu{color:#6ba3e0;border-color:#3a4a60}
-  .vr-room-preview.pctu{color:#c87aff;border-color:#4a3a60}
-  .vr-room-preview.pctubay{color:#e8a259;border-color:#5a3f1f}
-  .vr-room-preview.nicu{color:#7fb069;border-color:#3a5a35}
+  .vr-room-preview.picu{color:var(--picu);border-color:var(--picu)}
+  .vr-room-preview.pctu{color:var(--pctu);border-color:var(--pctu)}
+  .vr-room-preview.pctubay{color:var(--pctubay);border-color:var(--pctubay)}
+  .vr-room-preview.nicu{color:var(--nicu);border-color:var(--nicu)}
 
   .vr-toggle{
     display:inline-flex;align-items:center;gap:5px;
@@ -414,10 +481,10 @@
     letter-spacing:1.5px;text-transform:uppercase;
     color:var(--ink-2);
   }
-  .vr-cat-head.picu{border-left-color:#6ba3e0;color:#6ba3e0}
-  .vr-cat-head.pctu{border-left-color:#c87aff;color:#c87aff}
-  .vr-cat-head.pctubay{border-left-color:#e8a259;color:#e8a259}
-  .vr-cat-head.nicu{border-left-color:#7fb069;color:#7fb069}
+  .vr-cat-head.picu{border-left-color:var(--picu);color:var(--picu)}
+  .vr-cat-head.pctu{border-left-color:var(--pctu);color:var(--pctu)}
+  .vr-cat-head.pctubay{border-left-color:var(--pctubay);color:var(--pctubay)}
+  .vr-cat-head.nicu{border-left-color:var(--nicu);color:var(--nicu)}
   .vr-cat-count{font-family:'JetBrains Mono',monospace;color:var(--ink-3);font-size:10px}
 
   .vr-cat-body{
@@ -430,24 +497,43 @@
     padding:8px 10px;
     background:var(--panel-2);
     border-top:1px solid var(--line);
+    border-left:4px solid transparent;
     cursor:pointer;
-    transition:background .15s;
+    transition:background .15s,filter .15s;
   }
   .vr-cat-body .vr-row:first-child{border-top:none}
-  .vr-row:hover{background:#2a2520}
+  .vr-row:hover{filter:brightness(1.18)}
+  /* Unit color on the row itself, not just the group header — a saturated
+     tinted background plus a solid color spine, so the unit reads without
+     needing to scroll up to the category header. */
+  .vr-row.cat-picu{background:color-mix(in srgb,var(--picu) 20%,var(--panel-2));border-left-color:var(--picu)}
+  .vr-row.cat-pctu{background:color-mix(in srgb,var(--pctu) 20%,var(--panel-2));border-left-color:var(--pctu)}
+  .vr-row.cat-pctubay{background:color-mix(in srgb,var(--pctubay) 20%,var(--panel-2));border-left-color:var(--pctubay)}
+  .vr-row.cat-nicu{background:color-mix(in srgb,var(--nicu) 20%,var(--panel-2));border-left-color:var(--nicu)}
+  /* Danger level takes over the row color — more urgent than the unit tint. */
+  .vr-row.danger-low{background:color-mix(in srgb,var(--accent) 26%,var(--panel-2));border-left-color:var(--accent);border-left-width:5px}
+  .vr-row.danger-high{background:color-mix(in srgb,var(--danger) 32%,var(--panel-2));border-left-color:var(--danger);border-left-width:6px}
+  .vr-row.danger-high .vr-name{font-size:15px;font-weight:700}
+  /* Confidential takes over everything — the highest-priority visual, a solid
+     block of color plus a hazard-stripe edge so it can't be mistaken for a
+     tinted row at a glance. */
   .vr-row.confidential{
     background:#d24a3a;
     color:#0a0606;
+    border-left-width:6px;
+    border-left-color:#0a0606;
+    background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.18) 0 8px,transparent 8px 16px);
   }
-  .vr-row.confidential:hover{background:#bf3e30}
-  .vr-row.confidential .vr-room{background:rgba(0,0,0,.25);color:#000}
+  .vr-row.confidential:hover{filter:brightness(1.08)}
+  .vr-row.confidential .vr-room{background:rgba(0,0,0,.3);color:#000}
   .vr-row.confidential .vr-name{color:#000}
   .vr-row.confidential .vr-notes{color:#2a0a05}
   .vr-row.confidential .vr-conf-tag{display:inline-block}
-  .vr-row.danger-low{border-left:3px solid var(--accent)}
-  .vr-row.danger-high .vr-name{font-size:15px;font-weight:700}
-  .vr-row.danger-high{border-left:3px solid var(--danger)}
-  .vr-row.danger-high.confidential{border-left-color:#0a0606}
+  .vr-row.danger-high.confidential{border-left-color:#000;animation:vrCritPulse 1.6s ease-in-out infinite}
+  @keyframes vrCritPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}
+    50%{box-shadow:inset 0 0 0 2px rgba(0,0,0,.5)}
+  }
 
   .vr-room{
     flex-shrink:0;
@@ -463,7 +549,7 @@
   .vr-name{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3}
   .vr-name.empty{font-style:italic;font-weight:400;color:var(--ink-3)}
   .vr-row.confidential .vr-name.empty{color:#2a0a05}
-  .vr-notes{font-size:11px;color:var(--ink-3);line-height:1.4;margin-top:2px;word-break:break-word}
+  .vr-notes{font-size:11px;color:var(--ink-2);line-height:1.4;margin-top:2px;word-break:break-word}
   .vr-conf-tag{
     display:none;
     font-size:9px;font-weight:700;letter-spacing:1.5px;
@@ -471,10 +557,20 @@
     padding:2px 5px;border-radius:3px;
     margin-bottom:3px;
   }
+  /* Danger level is spelled out in text, not just the border color, for colorblind readers. */
+  .vr-danger-tag{
+    display:inline-block;
+    font-size:9px;font-weight:700;letter-spacing:1.5px;
+    padding:2px 5px;border-radius:3px;
+    margin-bottom:3px;margin-right:4px;
+  }
+  .vr-row.danger-low .vr-danger-tag{background:var(--accent-soft);color:var(--accent)}
+  .vr-row.danger-high .vr-danger-tag{background:var(--danger);color:#fff}
+  .vr-row.danger-high.confidential .vr-danger-tag{background:#000;color:#fff}
   .vr-empty{
     text-align:center;padding:20px 12px;
-    color:var(--ink-3);font-size:12px;font-style:italic;
-    border:1px dashed var(--line);border-radius:var(--radius-sm);
+    color:var(--ink-2);font-size:12px;font-style:italic;
+    border:1px dashed var(--line-2);border-radius:var(--radius-sm);
   }
 
   /* VR alert block on clock pane — slimmer than break alert */
@@ -586,6 +682,9 @@
     border-radius:var(--radius-sm);
     padding:6px;
     margin-bottom:10px;
+    max-height:160px;
+    overflow-y:auto;
+    scrollbar-width:thin;
   }
   .picker button{
     aspect-ratio:1;
@@ -605,6 +704,40 @@
     border-radius:6px;cursor:pointer;font-family:inherit;
   }
   .picker-tab.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+  /* Parked entries strip (below clock header) */
+  .parked-strip{
+    display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;
+    padding:7px 14px;
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+    scrollbar-width:thin;
+  }
+  .parked-strip.hidden{display:none}
+  .parked-chip{
+    display:flex;align-items:center;gap:5px;
+    padding:5px 11px;flex-shrink:0;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:20px;cursor:pointer;
+    font-size:13px;color:var(--ink-2);
+    transition:border-color .15s,color .15s;
+    white-space:nowrap;
+  }
+  .parked-chip:hover{border-color:var(--ok);color:var(--ok)}
+  .parked-chip-name{font-size:11px;max-width:70px;overflow:hidden;text-overflow:ellipsis}
+
+  /* Parked entry row in tracker list */
+  .entry.parked{opacity:0.45}
+  .entry.parked .e-time{font-size:11px;color:var(--ink-3);font-style:italic}
+  .e-icon{cursor:pointer;position:relative}
+  .e-icon:hover::after{
+    content:'↩';position:absolute;top:-4px;right:-4px;
+    font-size:9px;background:var(--accent-soft);color:var(--accent);
+    border-radius:50%;width:12px;height:12px;
+    display:flex;align-items:center;justify-content:center;
+    line-height:1;
+  }
+  .entry.parked .e-icon:hover::after{content:'▶';background:var(--ok-soft,#2a3d2a);color:var(--ok)}
 
   .tracker-controls{
     display:flex;gap:6px;margin-bottom:12px;align-items:center;flex-wrap:wrap;
@@ -632,8 +765,8 @@
   .tracker-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
   .empty{
     text-align:center;padding:24px 12px;
-    color:var(--ink-3);font-size:12px;
-    border:1px dashed var(--line);border-radius:var(--radius-sm);
+    color:var(--ink-2);font-size:12px;
+    border:1px dashed var(--line-2);border-radius:var(--radius-sm);
   }
 
   .entry{
@@ -660,7 +793,14 @@
   .e-info{flex:1;min-width:0;display:flex;flex-direction:column}
   .e-name{font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .e-name.empty{color:var(--ink-3);font-weight:400;font-style:italic}
-  .e-meta{font-size:10px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;margin-top:1px}
+  .e-meta{font-size:10px;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;display:flex;align-items:center;gap:5px}
+  /* Status is shape+text, not color alone, so it still reads for colorblind users. */
+  .e-status{font-weight:700;letter-spacing:.5px}
+  .e-status.in{color:var(--ok)}
+  .e-status.out{color:var(--danger)}
+  .e-status::before{margin-right:2px}
+  .e-status.in::before{content:'\25B2'}
+  .e-status.out::before{content:'\25BC'}
   .e-time{
     font-family:'JetBrains Mono',monospace;
     font-size:14px;font-weight:500;
@@ -694,6 +834,26 @@
     display:inline-block;width:8px;height:8px;border-radius:50%;
     background:var(--accent);
   }
+  .pass-title .dot-t{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:#6ba3e0;
+  }
+  .pass-title .dot-f{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:#c87aff;
+  }
+  .pass-title .dot-p{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--ok);
+  }
+  .pass-title .dot-n{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:#4fc3c7;
+  }
+  .pass-title .dot-vp{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:#e8c34a;
+  }
   .pass-sub{font-size:10px;color:var(--ink-3);margin-bottom:8px;line-height:1.4}
   .pass-input-row{display:flex;gap:6px;margin-bottom:8px}
   .pass-input{
@@ -710,8 +870,8 @@
   .pass-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
   .pass-empty{
     text-align:center;padding:18px 12px;
-    color:var(--ink-3);font-size:11px;
-    border:1px dashed var(--line);border-radius:var(--radius-sm);
+    color:var(--ink-2);font-size:11px;
+    border:1px dashed var(--line-2);border-radius:var(--radius-sm);
     font-style:italic;
   }
   .pass-item{
@@ -728,6 +888,8 @@
   .pass-item.todo{border-left-color:#6ba3e0}
   .pass-item.tofix{border-left-color:#c87aff}
   .pass-item.protips{border-left-color:var(--ok)}
+  .pass-item.nursepref{border-left-color:#4fc3c7}
+  .pass-item.visitorpref{border-left-color:#e8c34a}
   .pass-item.done{opacity:.45}
   .pass-item.done .pass-text{text-decoration:line-through;color:var(--ink-3)}
   .pass-check{
@@ -837,7 +999,7 @@
     margin-bottom:14px;
     font-family:'JetBrains Mono',monospace;
     font-size:12px;
-    color:var(--ink-3);
+    color:var(--ink-2);
     line-height:1.6;
   }
   .fto-eq strong{color:var(--accent);font-weight:500}
@@ -869,7 +1031,171 @@
     line-height:1.6;
   }
 
+  /* ====== SETTINGS PANE ====== */
+  .settings-block{margin-bottom:20px}
+  .settings-label{
+    font-size:10px;color:var(--ink-3);
+    letter-spacing:2px;text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .settings-edition{
+    font-family:'JetBrains Mono',monospace;
+    font-size:48px;font-weight:700;
+    color:var(--accent);letter-spacing:-2px;line-height:1;
+    margin-bottom:6px;
+  }
+  .settings-edition-date{
+    font-size:11px;color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;
+    margin-bottom:14px;
+  }
+  .settings-app-name{
+    font-size:18px;font-weight:600;color:var(--ink);
+    margin-bottom:4px;
+  }
+  .settings-app-meta{
+    font-size:11px;color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .settings-schedule-area{
+    width:100%;box-sizing:border-box;
+    background:var(--panel-2);border:1px solid var(--line);
+    color:var(--ink);font-family:'JetBrains Mono',monospace;
+    font-size:11px;line-height:1.5;
+    padding:10px;border-radius:4px;
+    min-height:220px;max-height:400px;
+    resize:vertical;outline:none;
+    margin-top:10px;
+  }
+  .settings-schedule-area:focus{border-color:var(--accent)}
+  .settings-import-msg{
+    font-size:11px;margin-top:6px;min-height:16px;
+  }
+  .settings-import-msg.ok{color:var(--ok)}
+  .settings-import-msg.err{color:var(--danger)}
+  .contrast-opt.active{background:var(--accent);border-color:var(--accent);color:#1a1612}
+  .textsize-opt.active{background:var(--accent);border-color:var(--accent);color:#1a1612}
+  /* Text size scales the whole card (layout included), for anyone who needs
+     larger type or bigger touch targets, independent of the contrast mode. */
+  html[data-textsize="large"] .app{zoom:1.15}
+  html[data-textsize="xlarge"] .app{zoom:1.3}
+
+  /* ====== SUPPLIES ORDERING PANE ====== */
+  .sup-catalog-link{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:10px;font-weight:700;letter-spacing:.5px;
+    color:var(--accent);text-decoration:none;
+    margin-bottom:12px;
+  }
+  .sup-catalog-link:hover{text-decoration:underline}
+  .sup-note-danger{
+    font-size:12px;font-weight:700;line-height:1.5;
+    color:var(--danger);
+    background:rgba(210,74,58,.1);
+    border:1px solid var(--danger);
+    border-radius:var(--radius-sm);
+    padding:9px 11px;
+    margin-bottom:12px;
+  }
+  .sup-top-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .sup-field{flex:1;min-width:140px}
+  .sup-field label{
+    display:block;font-size:10px;font-weight:700;
+    letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--ink-3);margin-bottom:4px;
+  }
+  .sup-field select,.sup-field input{
+    width:100%;background:var(--bg);
+    border:1px solid var(--line);color:var(--ink);
+    padding:8px 9px;border-radius:6px;
+    font-family:inherit;font-size:13px;
+  }
+  .sup-field select:focus,.sup-field input:focus{outline:none;border-color:var(--accent)}
+  .sup-list{
+    display:flex;flex-direction:column;gap:6px;
+    max-height:260px;overflow-y:auto;
+    margin-bottom:12px;
+    scrollbar-width:thin;
+  }
+  .sup-list::-webkit-scrollbar{width:4px}
+  .sup-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
+  .sup-item{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    transition:border-color .15s;
+  }
+  .sup-item.has-qty{border-color:var(--accent)}
+  .sup-item-info{flex:1;min-width:0}
+  .sup-item-name{font-size:12px;font-weight:700;color:var(--ink);line-height:1.35}
+  .sup-item-code{font-size:10px;color:var(--ink-3);font-family:'JetBrains Mono',monospace;margin-top:1px}
+  .sup-qty{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .sup-qty-btn{
+    width:26px;height:26px;flex-shrink:0;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink-2);
+    border-radius:6px;font-size:14px;font-family:inherit;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+    transition:all .15s;
+  }
+  .sup-qty-btn:hover{background:var(--line);color:var(--ink)}
+  .sup-qty-btn:disabled{opacity:.35;cursor:not-allowed}
+  .sup-qty-btn:disabled:hover{background:var(--bg);color:var(--ink-2)}
+  .sup-qty-input{
+    width:42px;text-align:center;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    padding:5px 2px;border-radius:6px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  .sup-qty-input:focus{outline:none;border-color:var(--accent)}
+  .sup-nonstock{
+    border:1px dashed var(--line-2);
+    border-radius:var(--radius-sm);
+    padding:10px;margin-bottom:14px;
+  }
+  .sup-nonstock-head{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .sup-nonstock-row{display:flex;gap:6px;margin-bottom:6px}
+  .sup-nonstock-row input[type="text"]{flex:1;min-width:0}
+  .sup-nonstock-row input[type="number"]{width:56px;flex-shrink:0}
+  .sup-nonstock-row input{
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    padding:7px 8px;border-radius:6px;font-family:inherit;font-size:12px;
+  }
+  .sup-nonstock-row input:focus{outline:none;border-color:var(--accent)}
+  .sup-nonstock-list{display:flex;flex-direction:column;gap:4px}
+  .sup-nonstock-item{
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;color:var(--ink-2);
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:6px;padding:5px 8px;
+  }
+  .sup-nonstock-item .n-text{flex:1;min-width:0}
+  .sup-nonstock-item .n-del{background:transparent;border:none;color:var(--ink-3);cursor:pointer;font-size:14px;line-height:1;padding:0 2px}
+  .sup-nonstock-item .n-del:hover{color:var(--danger)}
+  .sup-output-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .sup-output-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3)}
+  .sup-output{
+    width:100%;box-sizing:border-box;
+    background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;
+    padding:10px;border-radius:6px;
+    min-height:200px;resize:vertical;
+  }
+  .sup-output:focus{outline:none;border-color:var(--accent)}
+  .sup-copy-msg{font-size:11px;margin-top:6px;min-height:14px;color:var(--ok)}
+
   /* ====== Accessibility ====== */
+  /* Visible keyboard-focus ring on every interactive element. Several controls
+     above set outline:none and rely on a subtle border-color change alone —
+     that's too faint to track for keyboard/low-vision users, so this adds a
+     box-shadow ring (doesn't fight the outline:none rules, just layers on top). */
+  :where(a,button,input,textarea,select,summary,[tabindex]):focus-visible{
+    box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent);
+  }
   @media (prefers-reduced-motion:reduce){
     *{transition:none !important;animation:none !important}
   }
@@ -881,7 +1207,9 @@
 
   <!-- ===== Clock strip ===== -->
   <header class="clock-strip">
-    <svg class="ring" width="68" height="68" viewBox="0 0 200 200" aria-hidden="true">
+    <svg class="ring" width="200" height="220" viewBox="-50 -70 300 320" aria-hidden="true">
+      <g id="tracker-rings"></g>
+      <g id="focus-ring"></g>
       <circle cx="100" cy="100" r="88" fill="none" stroke="#2d2925" stroke-width="6"/>
       <circle id="arc" cx="100" cy="100" r="88" fill="none"
         stroke="#e8a259" stroke-width="6" stroke-linecap="round"
@@ -889,6 +1217,7 @@
         transform="rotate(-90 100 100)" opacity="0.85"/>
       <g id="ticks"></g>
       <circle id="pdot" cx="100" cy="12" r="6" fill="#e8a259"/>
+      <g id="ring-labels"></g>
     </svg>
     <div class="time-block">
       <div class="time-row">
@@ -899,19 +1228,27 @@
     </div>
   </header>
 
+  <!-- ===== Parked entries quick-tap strip ===== -->
+  <div class="parked-strip hidden" id="parked-strip" aria-label="Saved individuals — tap to restart timer"></div>
+
   <!-- ===== Tabs ===== -->
   <div class="tabs-wrap" id="tabs-wrap">
     <nav class="tabs" id="tabs" role="tablist">
       <button class="tab active" role="tab" aria-selected="true" data-target="clock">Clock</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="details">Details</button>
       <button class="tab" role="tab" aria-selected="false" data-target="tracker">Tracker</button>
       <button class="tab" role="tab" aria-selected="false" data-target="passons">Pass-Ons<span class="count hidden" id="passon-count">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-target="todo">To-Do<span class="count hidden" id="todo-count">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-target="tofix">To-Fix<span class="count hidden" id="tofix-count">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-target="protips">ProTips</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="nursepref">Nurse Pref.</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="visitorpref">Visitor Pref.</button>
       <button class="tab" role="tab" aria-selected="false" data-target="fto">FTO</button>
       <button class="tab" role="tab" aria-selected="false" data-target="vr">VR List<span class="count hidden" id="vr-count">0</span></button>
+      <button class="tab" role="tab" aria-selected="false" data-target="supplies">Supplies</button>
       <button class="tab" role="tab" aria-selected="false" data-target="movement">Focus Timer</button>
       <button class="tab" role="tab" aria-selected="false" data-target="misc">Misc</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="settings">⚙</button>
       <a class="tab external" href="https://vcc.med.umich.edu/Home/MiChartMottCapacity" target="_blank" rel="noopener">MiChart</a>
     </nav>
   </div>
@@ -932,6 +1269,14 @@
       <div class="phase-time mono" id="pt">—</div>
     </div>
     <div class="phase-summary" id="ps">—</div>
+  </section>
+
+  <!-- ===== Pane: Details ===== -->
+  <section class="pane" data-pane="details" role="tabpanel" aria-hidden="true">
+    <div class="phase-card">
+      <div class="phase-name" id="pn-d">—</div>
+      <div class="phase-time mono" id="pt-d">—</div>
+    </div>
 
     <div class="detail-box" aria-live="polite" aria-atomic="true">
       <div class="d-layer on" id="la"><div class="d-txt" id="ta"></div></div>
@@ -1062,6 +1407,36 @@
     </div>
   </section>
 
+  <!-- ===== Pane: Nurse Preferences ===== -->
+  <section class="pane" data-pane="nursepref" role="tabpanel" aria-hidden="true">
+    <div class="pass-section">
+      <div class="pass-head">
+        <div class="pass-title"><span class="dot-n"></span>Nurse Preferences</div>
+      </div>
+      <div class="pass-sub">Quick reference for how each nurse likes to be looped in — paging, timing, updates.</div>
+      <div class="pass-input-row">
+        <input type="text" class="pass-input" id="nursepref-input" placeholder="e.g. RN Alvarez (PICU) — text before paging overnight" maxlength="200">
+        <button class="btn sm primary" id="nursepref-add">Add</button>
+      </div>
+      <div class="pass-list" id="nursepref-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== Pane: Visitor Preferences ===== -->
+  <section class="pane" data-pane="visitorpref" role="tabpanel" aria-hidden="true">
+    <div class="pass-section">
+      <div class="pass-head">
+        <div class="pass-title"><span class="dot-vp"></span>Visitor Preferences</div>
+      </div>
+      <div class="pass-sub">Quick reference for family/visitor preferences — access, communication, comfort needs.</div>
+      <div class="pass-input-row">
+        <input type="text" class="pass-input" id="visitorpref-input" placeholder="e.g. Room 14 family — prefers written passes, limited overhead paging" maxlength="200">
+        <button class="btn sm primary" id="visitorpref-add">Add</button>
+      </div>
+      <div class="pass-list" id="visitorpref-list"></div>
+    </div>
+  </section>
+
   <!-- ===== Pane: VR List ===== -->
   <section class="pane" data-pane="vr" role="tabpanel" aria-hidden="true">
     <div class="vr-form" id="vr-form-block">
@@ -1089,10 +1464,67 @@
 
     <div id="vr-list"></div>
 
-    <div style="margin-top:10px;font-size:10px;color:var(--ink-3);line-height:1.5;letter-spacing:.3px">
-      <strong style="color:var(--ink-2)">Tips:</strong>
+    <div style="margin-top:10px;font-size:10px;color:var(--ink-2);line-height:1.5;letter-spacing:.3px">
+      <strong style="color:var(--ink)">Tips:</strong>
       Click a row to delete · Shift-click to toggle confidential · Alt-click to cycle danger level (none → elevated → high)
     </div>
+  </section>
+
+  <!-- ===== Pane: Supplies Ordering ===== -->
+  <section class="pane" data-pane="supplies" role="tabpanel" aria-hidden="true">
+    <a class="sup-catalog-link" href="https://scscada.med.umich.edu/cada/ItemCatalog/ItemCatalogSearch?currentpage=2" target="_blank" rel="noopener">Item Catalog (look up codes) ↗</a>
+
+    <div class="sup-note-danger">You can order supplies directly using the PCTU Unit Code at 206760. Always let Steve know in an email using unique name SSCZESNY</div>
+
+    <div class="sup-top-row">
+      <div class="sup-field">
+        <label for="sup-dept">Ordering as / deliver to</label>
+        <select id="sup-dept">
+          <option value="picu-host">PICU Host — Desk 10-243</option>
+          <option value="picu-clerk">PICU Clerk — Desk 10-243</option>
+          <option value="pctu-clerk">PCTU Clerk — Desk 10-211</option>
+        </select>
+      </div>
+      <div class="sup-field">
+        <label for="sup-recipient">Greeting ("Hi ___,")</label>
+        <input type="text" id="sup-recipient" placeholder="Supply Chain Team" maxlength="60">
+      </div>
+    </div>
+
+    <div class="sup-list" id="sup-list"></div>
+
+    <div class="sup-nonstock">
+      <div class="sup-nonstock-head">Non-Stock Item (needs supervisor approval)</div>
+      <div class="sup-nonstock-row">
+        <input type="text" id="sup-ns-name" placeholder="Item name / description" maxlength="120">
+        <input type="number" id="sup-ns-qty" placeholder="Qty" min="1" value="1" inputmode="numeric">
+        <button class="btn sm primary" id="sup-ns-add">Add</button>
+      </div>
+      <div class="sup-nonstock-list" id="sup-ns-list"></div>
+    </div>
+
+    <div class="sup-output-head">
+      <div class="sup-output-label">Email Draft</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn sm" id="sup-copy">Copy</button>
+        <button class="btn sm danger" id="sup-reset">Reset</button>
+      </div>
+    </div>
+    <textarea class="sup-output" id="sup-output" spellcheck="false" readonly></textarea>
+    <div class="sup-copy-msg" id="sup-copy-msg"></div>
+
+    <details class="expand" style="margin-top:12px">
+      <summary>Ordering notes</summary>
+      <div class="body">
+        <ul>
+          <li>Consider dividing orders between <strong>PICU Host/Clerk</strong> and <strong>PCTU Clerk</strong> — helps with financial and logistical tracking.</li>
+          <li>PCTU Clerk desk is <strong>10-211</strong> if items need to be delivered there.</li>
+          <li><strong>Non-stock items</strong> need a supervisor's approval before ordering.</li>
+          <li>Clerks/Hosts can call supply chain <strong>7–10</strong>; otherwise use the paging system.</li>
+          <li>Call supply chain at <strong>936-4029</strong> or email <strong>MS-CSR-STAFF@med.umich.edu</strong>. Include your department ordering code.</li>
+        </ul>
+      </div>
+    </details>
   </section>
 
   <!-- ===== Pane: Movement Reminder ===== -->
@@ -1188,6 +1620,53 @@
       <div class="fto-break" id="fto-break"></div>
     </div>
   </section>
+
+  <!-- ===== Pane: Settings ===== -->
+  <section class="pane" data-pane="settings" role="tabpanel" aria-hidden="true">
+    <div class="settings-block">
+      <div class="settings-label">Text Visibility</div>
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:8px">Standard is the default — brighter than the original look and easier to read. Classic brings back the original dim look. Ultra High-Vis maximizes contrast for bright rooms or quick glances.</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap" id="contrast-options">
+        <button class="btn sm contrast-opt" data-contrast="classic">Classic</button>
+        <button class="btn sm contrast-opt" data-contrast="normal">Standard</button>
+        <button class="btn sm contrast-opt" data-contrast="ultra">Ultra High-Vis</button>
+      </div>
+    </div>
+    <div class="settings-block">
+      <div class="settings-label">Text Size</div>
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:8px">Scales the whole card, including buttons and touch targets — not just the font.</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap" id="textsize-options">
+        <button class="btn sm textsize-opt" data-textsize="standard">Standard</button>
+        <button class="btn sm textsize-opt" data-textsize="large">Large</button>
+        <button class="btn sm textsize-opt" data-textsize="xlarge">X-Large</button>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div class="settings-block">
+      <div class="settings-label">Edition</div>
+      <div class="settings-edition" id="settings-edition">—</div>
+      <div class="settings-edition-date" id="settings-edition-date"></div>
+      <button class="btn primary" id="settings-bump">Bump Edition</button>
+    </div>
+    <div class="sep"></div>
+    <div class="settings-block">
+      <div class="settings-label">Nurse &amp; Visitor Preferences</div>
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:8px">Export the Nurse Pref. and Visitor Pref. lists to JSON — for backup, or to move them to another device — edit the text, then Import to apply. Both lists already save to this browser automatically as you type.</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="btn sm primary" id="settings-export-prefs">Export Preferences</button>
+        <button class="btn sm" id="settings-import-prefs">Import Preferences</button>
+        <button class="btn sm danger" id="settings-clear-prefs">Clear All</button>
+      </div>
+      <textarea class="settings-schedule-area" id="settings-prefs-area" spellcheck="false" placeholder="Click Export to load the current preferences…"></textarea>
+      <div class="settings-import-msg" id="settings-prefs-msg"></div>
+    </div>
+    <div class="sep"></div>
+    <div class="settings-block">
+      <div class="settings-label">App</div>
+      <div class="settings-app-name">GSS Multi-Tool</div>
+      <div class="settings-app-meta" id="settings-store-key"></div>
+    </div>
+  </section>
 </div>
 
 <!-- ===== Modal (Tracker entry editor) ===== -->
@@ -1218,6 +1697,7 @@
       <div class="field">
         <label for="m-category">Category</label>
         <select id="m-category">
+          <option value="parent">Parent</option>
           <option value="staff">Staff</option>
           <option value="family">Family</option>
           <option value="visitor">Visitor</option>
@@ -1247,6 +1727,7 @@
    0) STORAGE
    ======================================================= */
 const STORE_KEY='shiftConsole.v1';
+const BUILD_STAMP='2026-08-09c'; // bump on deploy to verify Pages picked up the latest push
 function loadStore(){
   try{
     const raw=localStorage.getItem(STORE_KEY);
@@ -1263,7 +1744,7 @@ function saveStore(patch){
 /* =======================================================
    1) CLOCK
    ======================================================= */
-const PH=[
+let PH=[
   {s:5,e:7,n:"Early Morning",t:"5 – 7 AM",
    sum:"Overnight wrap-up, pharmacy pass, and the 6 AM collision point",
    d:[
@@ -1440,6 +1921,8 @@ function tickClock(){
   document.getElementById('pt').textContent=ph.t;
   document.getElementById('ps').textContent=ph.sum;
   document.getElementById('nx').textContent=ph.nx;
+  document.getElementById('pn-d').textContent=ph.n;
+  document.getElementById('pt-d').textContent=ph.t;
 
   if(lastP!==ph.n){
     lastP=ph.n; ci=0;
@@ -1449,6 +1932,7 @@ function tickClock(){
     rdots(ph.d.length,0);
     buildPanels(ph);
   }
+  updateClockRings();
 }
 
 function rotateDetail(){
@@ -1483,6 +1967,98 @@ function buildPanels(ph){
 tickClock();
 setInterval(tickClock,1000);
 setInterval(rotateDetail,7000);
+
+/* =======================================================
+   CLOCK RINGS — tracker status + focus timer
+   ======================================================= */
+function svgE(tag,attrs,text){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const[k,v]of Object.entries(attrs)) el.setAttribute(k,String(v));
+  if(text!=null) el.textContent=text;
+  return el;
+}
+function ringColor(min,status,paused){
+  if(paused) return '#5a5248';
+  if(min>=15) return '#d24a3a'; // red
+  if(min>=5)  return '#e8a259'; // amber
+  return '#7fb069';              // always green under 5 min
+}
+function ringSW(min,paused){
+  if(paused) return 2;
+  if(min>=20||min>=10) return 6; // thick
+  return 3.5;
+}
+function ringOp(min,paused){ return paused?0.35:min>=15?0.95:0.82; }
+function makeRingArc(cx,cy,r,frac,color,sw,op){
+  const C=2*Math.PI*r;
+  return svgE('circle',{cx,cy,r,fill:'none',stroke:color,'stroke-width':sw,
+    'stroke-linecap':'round','stroke-dasharray':C,
+    'stroke-dashoffset':C*(1-frac),transform:`rotate(-90 ${cx} ${cy})`,opacity:op});
+}
+function makeRingTrack(cx,cy,r){
+  return svgE('circle',{cx,cy,r,fill:'none',stroke:'#2d2925','stroke-width':'2'});
+}
+
+function updateClockRings(){
+  const gA=document.getElementById('tracker-rings');
+  const gF=document.getElementById('focus-ring');
+  const gL=document.getElementById('ring-labels');
+  if(!gA||!gF||!gL) return;
+  gA.innerHTML='';gF.innerHTML='';gL.innerHTML='';
+  const cx=100,cy=100;
+
+  // ---- Focus timer ring (r=74, inside tick marks) ----
+  if(window.getFocusState){
+    const fs=window.getFocusState();
+    const r=74;
+    const elapsed=fs.total-(fs.remaining||0);
+    let frac=fs.running?Math.min(elapsed/fs.total,1):0;
+    if(fs.mode==='chiming') frac=1;
+    if(frac>0){
+      const fc=fs.mode==='focus'?'#5bc8d8':fs.mode==='break'?'#7fb069':'#e8a259';
+      gF.appendChild(makeRingTrack(cx,cy,r));
+      gF.appendChild(makeRingArc(cx,cy,r,frac,fc,3,0.78));
+      const ang=-Math.PI/2+frac*2*Math.PI;
+      const lx=cx+(r+11)*Math.cos(ang), ly=cy+(r+11)*Math.sin(ang);
+      const me=fs.mode==='focus'?'🎯':fs.mode==='break'?'🏃':'🔔';
+      gL.appendChild(svgE('text',{x:lx,y:ly+3,'text-anchor':'middle',
+        'dominant-baseline':'middle','font-size':'9'},me));
+    }
+  }
+
+  // ---- Tracker rings (outside main arc: r=96,107,118,129) ----
+  // trackerData is a let declared later in the script; guard against TDZ on first tick
+  let td;
+  try{ td=trackerData; }catch(e){ return; }
+  const active=td?td.filter(o=>!o.parked):[];
+  if(!active.length) return;
+  const RADII=[96,107,118,129];
+  active.slice(0,RADII.length).forEach((o,i)=>{
+    const r=RADII[i];
+    const sec=elapsedSec(o), min=Math.floor(sec/60);
+    const frac=Math.min(sec/(20*60),1);
+    const color=ringColor(min,o.status,o.isPaused);
+    gA.appendChild(makeRingTrack(cx,cy,r));
+    if(frac>0) gA.appendChild(makeRingArc(cx,cy,r,frac,color,ringSW(min,o.isPaused),ringOp(min,o.isPaused)));
+    // Emoji + name label at arc leading edge (12 o'clock when not started)
+    const ang=frac>0?-Math.PI/2+frac*2*Math.PI:-Math.PI/2;
+    const lx=cx+(r+16)*Math.cos(ang), ly=cy+(r+16)*Math.sin(ang);
+    const emojiEl=svgE('text',{x:lx,y:ly+4,'text-anchor':'middle',
+      'dominant-baseline':'middle','font-size':'16',
+      style:'cursor:pointer',title:'Tap to mark returned: '+(o.name||o.emoji)},o.emoji);
+    emojiEl.addEventListener('click',()=>{ try{parkEntry(o.id);}catch(e){} });
+    gL.appendChild(emojiEl);
+    if(o.name){
+      const label=o.name.length>14?o.name.slice(0,13)+'…':o.name;
+      const nx=cx+(r+36)*Math.cos(ang), ny=cy+(r+36)*Math.sin(ang);
+      const nameEl=svgE('text',{x:nx,y:ny,'text-anchor':'middle',
+        'dominant-baseline':'middle','font-size':'14',
+        fill:color,'font-weight':'700',style:'cursor:pointer'},label);
+      nameEl.addEventListener('click',()=>{ try{parkEntry(o.id);}catch(e){} });
+      gL.appendChild(nameEl);
+    }
+  });
+}
 
 /* =======================================================
    2) TABS
@@ -1523,7 +2099,25 @@ document.querySelectorAll('.tab[data-target]').forEach(btn=>{
    3) TRACKER
    ======================================================= */
 const EMOJIS={
-  people:['👨','👩','👴','👵','🧒','👶','👮','👷','💂','🕵️','👨‍⚕️','👩‍⚕️','👨‍🔧','👩‍🔧','👨‍💼','👩‍💼','👫','👬','👭','🧔','🧓','🧑‍🎓','👨‍🍳','👩‍🍳','🚶','🏃','🧘','🗣️','👤','👥','🙋','🤷'],
+  people:[
+    '👨','👨🏻','👨🏼','👨🏽','👨🏾','👨🏿',
+    '👩','👩🏻','👩🏼','👩🏽','👩🏾','👩🏿',
+    '🧑','🧑🏻','🧑🏼','🧑🏽','🧑🏾','🧑🏿',
+    '🧒','🧒🏻','🧒🏼','🧒🏽','🧒🏾','🧒🏿',
+    '👦','👦🏻','👦🏼','👦🏽','👦🏾','👦🏿',
+    '👧','👧🏻','👧🏼','👧🏽','👧🏾','👧🏿',
+    '👴','👴🏻','👴🏼','👴🏽','👴🏾','👴🏿',
+    '👵','👵🏻','👵🏼','👵🏽','👵🏾','👵🏿',
+    '👶','👶🏻','👶🏼','👶🏽','👶🏾','👶🏿',
+    '👮','👮🏻','👮🏼','👮🏽','👮🏾','👮🏿',
+    '👷','👷🏻','👷🏼','👷🏽','👷🏾','👷🏿',
+    '🙋','🙋🏻','🙋🏼','🙋🏽','🙋🏾','🙋🏿',
+    '🤷','🤷🏻','🤷🏼','🤷🏽','🤷🏾','🤷🏿',
+    '🧔','🧔🏻','🧔🏼','🧔🏽','🧔🏾','🧔🏿',
+    '💂','💂🏻','💂🏼','💂🏽','💂🏾','💂🏿',
+    '🕵️','🧓','👨‍⚕️','👩‍⚕️','👨‍🔧','👩‍🔧','👨‍💼','👩‍💼',
+    '🧑‍🎓','👨‍🍳','👩‍🍳','🚶','🏃','🧘','🗣️','👤','👥'
+  ],
   vehicles:['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚚','🚛','🚜','🛴','🚲','🛵','🏍️','🚁','🚂','✈️','🚀','🛻','🚐','🚉','⛵','🛥️','🛺'],
   status:['✅','❌','⛔','🚫','💤','⏱️','⏲️','⏰','⌛','⏳','🔄','🔃','📥','📤','⚠️','🆘','🆕','🆗','🔒','🔓','🔔','📍','📅','📆','🚪','🛑'],
   misc:['📞','☕','🍕','🍽️','📱','📖','💧','💼','🚻','😷','🤒','🤕','🌧️','🌞','🌳','🚬','🛒','💊','📺','🎧','📚','🔧','🔋','🌼','📦','📋']
@@ -1531,7 +2125,7 @@ const EMOJIS={
 
 let trackerData=(loadStore().tracker||[]).map(o=>({
   // ensure new fields exist with safe defaults
-  isPaused:false,pausedAt:0,elapsedPaused:0,
+  isPaused:false,pausedAt:0,elapsedPaused:0,parked:false,
   ...o
 }));
 function saveTracker(){saveStore({tracker:trackerData})}
@@ -1560,8 +2154,8 @@ function uid(){return 'e'+Math.random().toString(36).slice(2,9)}
 function addEntry(emoji){
   const obj={
     id:uid(), emoji,
-    name:'', badge:'', status:'in', category:'staff', notes:'',
-    startTime:Date.now(), elapsedPaused:0, pausedAt:0, isPaused:false,
+    name:'', badge:'', status:'out', category:'parent', notes:'',
+    startTime:Date.now(), elapsedPaused:0, pausedAt:0, isPaused:false, parked:false,
     created:new Date().toISOString()
   };
   trackerData.push(obj);
@@ -1590,38 +2184,72 @@ function fmt(sec){
   return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }
 
+function renderParkedStrip(){
+  const strip=document.getElementById('parked-strip');
+  const parked=trackerData.filter(o=>o.parked);
+  if(!parked.length){strip.classList.add('hidden');strip.innerHTML='';return;}
+  strip.classList.remove('hidden');
+  strip.innerHTML=parked.map(o=>`
+    <button class="parked-chip" data-id="${o.id}" title="Tap to restart timer for ${o.name||o.emoji}">
+      <span>${o.emoji}</span>
+      <span class="parked-chip-name">${o.name||'—'}</span>
+    </button>`).join('');
+  strip.querySelectorAll('.parked-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>unparkEntry(btn.dataset.id));
+  });
+}
+
+function parkEntry(id){
+  const o=trackerData.find(x=>x.id===id); if(!o) return;
+  o.parked=true; o.isPaused=false; o.pausedAt=0;
+  saveTracker(); renderTracker(); renderParkedStrip();
+}
+function unparkEntry(id){
+  const o=trackerData.find(x=>x.id===id); if(!o) return;
+  o.parked=false; o.startTime=Date.now(); o.elapsedPaused=0; o.isPaused=false; o.pausedAt=0;
+  saveTracker(); renderTracker(); renderParkedStrip();
+}
+
 function renderTracker(){
   const list=document.getElementById('tracker-list');
   if(!trackerData.length){
     list.innerHTML='<div class="empty">No entries yet — pick an emoji above to start tracking.</div>';
+    renderParkedStrip();
     return;
   }
   const search=document.getElementById('search').value.toLowerCase().trim();
   const fStatus=document.getElementById('filter-status').value;
   list.innerHTML=trackerData.map(o=>{
     const sec=elapsedSec(o), min=Math.floor(sec/60);
-    const cls=timerClass(min,o.isPaused);
+    const cls=o.parked?'':timerClass(min,o.isPaused);
     let visible=true;
-    if(search){
-      visible=(o.name+' '+o.badge+' '+o.notes).toLowerCase().includes(search);
-    }
+    if(search) visible=(o.name+' '+o.badge+' '+o.notes).toLowerCase().includes(search);
     if(fStatus!=='all'&&visible) visible=o.status===fStatus;
+    const timeLabel=o.parked?'returned':o.isPaused?'PAUSE':fmt(sec);
     return `
-      <div class="entry${visible?'':' filtered'}" data-id="${o.id}">
-        <div class="e-icon">
+      <div class="entry${o.parked?' parked':''}${visible?'':' filtered'}" data-id="${o.id}">
+        <div class="e-icon" data-park="${o.id}" title="${o.parked?'Tap to restart':'Tap to mark returned'}">
           ${o.emoji}
           <span class="e-dot ${o.status}"></span>
         </div>
         <div class="e-info">
           <div class="e-name${o.name?'':' empty'}">${o.name||'Unassigned'}</div>
-          <div class="e-meta">${o.category}${o.badge?' · #'+o.badge:''}</div>
+          <div class="e-meta"><span class="e-status ${o.status}">${o.status==='in'?'In':'Out'}</span><span>${o.category}${o.badge?' · #'+o.badge:''}</span></div>
         </div>
-        <div class="e-time mono ${cls}">${o.isPaused?'PAUSE':fmt(sec)}</div>
+        <div class="e-time mono ${cls}">${timeLabel}</div>
       </div>`;
   }).join('');
   list.querySelectorAll('.entry').forEach(el=>{
+    // Emoji icon click → park / unpark; row click → modal
+    el.querySelector('.e-icon').addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const o=trackerData.find(x=>x.id===el.dataset.id);
+      if(o.parked) unparkEntry(el.dataset.id);
+      else parkEntry(el.dataset.id);
+    });
     el.addEventListener('click',()=>openModal(el.dataset.id));
   });
+  renderParkedStrip();
 }
 
 // Update timers every second
@@ -1726,7 +2354,9 @@ const LISTS={
   eos:{key:'eos',cls:'eos',listEl:'eos-list',inputEl:'eos-input',addBtn:'eos-add',countEl:null,onClock:false,emptyMsg:'No end-of-shift notes yet. Add things to pass along at handoff.'},
   todo:{key:'todo',cls:'todo',listEl:'todo-list',inputEl:'todo-input',addBtn:'todo-add',countEl:'todo-count',onClock:false,emptyMsg:'Nothing on the to-do list. Add things to take care of this shift.'},
   tofix:{key:'tofix',cls:'tofix',listEl:'tofix-list',inputEl:'tofix-input',addBtn:'tofix-add',countEl:'tofix-count',onClock:false,emptyMsg:'No fix-it items. Add things that are slightly off so you remember to clean them up.'},
-  protips:{key:'protips',cls:'protips',listEl:'protips-list',inputEl:'protips-input',addBtn:'protips-add',countEl:null,onClock:false,emptyMsg:'No tips yet.'}
+  protips:{key:'protips',cls:'protips',listEl:'protips-list',inputEl:'protips-input',addBtn:'protips-add',countEl:null,onClock:false,emptyMsg:'No tips yet.'},
+  nursepref:{key:'nursepref',cls:'nursepref',listEl:'nursepref-list',inputEl:'nursepref-input',addBtn:'nursepref-add',countEl:null,onClock:false,emptyMsg:'No nurse preferences noted yet.'},
+  visitorpref:{key:'visitorpref',cls:'visitorpref',listEl:'visitorpref-list',inputEl:'visitorpref-input',addBtn:'visitorpref-add',countEl:null,onClock:false,emptyMsg:'No visitor preferences noted yet.'}
 };
 
 const data={};
@@ -1956,19 +2586,21 @@ calcFTO();
   }
 
   function rowHTML(o,asClockAlert){
-    const cls=['vr-row'];
+    const cls=['vr-row','cat-'+o.cat];
     if(o.confidential) cls.push('confidential');
     if(o.danger==='low') cls.push('danger-low');
     if(o.danger==='high') cls.push('danger-high');
     const name=o.name?escapeHtml(o.name):'<span class="empty">No name</span>';
     const notes=o.notes?`<div class="vr-notes">${escapeHtml(o.notes)}</div>`:'';
     const confTag=o.confidential?`<div class="vr-conf-tag">CONFIDENTIAL</div>`:'';
+    const dangerTag=o.danger==='low'?'<span class="vr-danger-tag">ELEVATED</span>'
+      :o.danger==='high'?'<span class="vr-danger-tag">HIGH RISK</span>':'';
     const dataAttr=asClockAlert?'':` data-id="${o.id}"`;
     return `
       <div class="${cls.join(' ')}"${dataAttr}>
         <div class="vr-room">${o.room}</div>
         <div class="vr-info">
-          ${confTag}
+          ${confTag}${dangerTag}
           <div class="vr-name">${name}</div>
           ${notes}
         </div>
@@ -2178,7 +2810,124 @@ calcFTO();
     }
   });
 
+  // Expose state for the clock ring display
+  window.getFocusState=function(){
+    const remaining=timerInterval?Math.max(0,Math.ceil((endTime-Date.now())/1000)):timeLeft;
+    return{mode,remaining,total:mode==='break'?BREAK_DURATION:focusDuration,running:!!timerInterval};
+  };
+
   updateDisplay();
+})();
+
+/* =======================================================
+   SETTINGS — edition bump
+   ======================================================= */
+(function(){
+  function loadSettings(){ return loadStore().settings||{}; }
+  function saveSettings(patch){ saveStore({settings:{...loadSettings(),...patch}}); }
+
+  function renderSettings(){
+    const s=loadSettings();
+    const ed=s.edition||1;
+    document.getElementById('settings-edition').textContent='Edition '+ed;
+    const d=s.editionDate?new Date(s.editionDate).toLocaleDateString('en-US',
+      {weekday:'short',year:'numeric',month:'short',day:'numeric'}):'—';
+    document.getElementById('settings-edition-date').textContent='Since '+d;
+    document.getElementById('settings-store-key').textContent='store: '+STORE_KEY+' · build '+BUILD_STAMP;
+  }
+
+  document.getElementById('settings-bump').addEventListener('click',()=>{
+    const s=loadSettings();
+    const next=(s.edition||1)+1;
+    saveSettings({edition:next,editionDate:new Date().toISOString()});
+    renderSettings();
+  });
+
+  // Nurse & Visitor Preferences export / import
+  const prefsArea=document.getElementById('settings-prefs-area');
+  const prefsMsg=document.getElementById('settings-prefs-msg');
+
+  document.getElementById('settings-export-prefs').addEventListener('click',()=>{
+    prefsArea.value=JSON.stringify({nursePref:data.nursepref,visitorPref:data.visitorpref},null,2);
+    prefsMsg.textContent=''; prefsMsg.className='settings-import-msg';
+  });
+
+  document.getElementById('settings-import-prefs').addEventListener('click',()=>{
+    try{
+      const parsed=JSON.parse(prefsArea.value);
+      if(typeof parsed!=='object'||parsed===null||Array.isArray(parsed))
+        throw new Error('Must be an object with nursePref and/or visitorPref arrays');
+      const normalize=(arr,label)=>{
+        if(arr==null) return null;
+        if(!Array.isArray(arr)) throw new Error(label+' must be an array');
+        return arr.map(item=>{
+          if(typeof item==='string') return {id:passUID(),text:item,time:stamp(),done:false,ts:Date.now()};
+          if(!item||typeof item.text!=='string'||!item.text.trim())
+            throw new Error('Each '+label+' entry needs a text field');
+          return {id:item.id||passUID(),text:item.text,time:item.time||stamp(),done:!!item.done,ts:item.ts||Date.now()};
+        });
+      };
+      const np=normalize(parsed.nursePref,'nursePref');
+      const vp=normalize(parsed.visitorPref,'visitorPref');
+      if(np) data.nursepref=np;
+      if(vp) data.visitorpref=vp;
+      saveLists();
+      renderList('nursepref'); renderList('visitorpref');
+      prefsMsg.textContent='✓ Imported.';
+      prefsMsg.className='settings-import-msg ok';
+    }catch(e){
+      prefsMsg.textContent='✗ '+e.message;
+      prefsMsg.className='settings-import-msg err';
+    }
+  });
+
+  document.getElementById('settings-clear-prefs').addEventListener('click',()=>{
+    if(!confirm('Clear all Nurse and Visitor preference entries?')) return;
+    data.nursepref=[]; data.visitorpref=[];
+    saveLists();
+    renderList('nursepref'); renderList('visitorpref');
+    prefsArea.value='';
+    prefsMsg.textContent='Cleared.';
+    prefsMsg.className='settings-import-msg ok';
+  });
+
+  // Text visibility / contrast mode
+  function applyContrast(mode){
+    document.documentElement.setAttribute('data-contrast',mode);
+    document.querySelectorAll('.contrast-opt').forEach(function(b){
+      b.classList.toggle('active',b.dataset.contrast===mode);
+    });
+  }
+  document.getElementById('contrast-options').addEventListener('click',(e)=>{
+    const btn=e.target.closest('.contrast-opt');
+    if(!btn) return;
+    const mode=btn.dataset.contrast;
+    saveSettings({contrastMode:mode});
+    applyContrast(mode);
+  });
+
+  // Text size
+  function applyTextSize(size){
+    if(size==='standard') document.documentElement.removeAttribute('data-textsize');
+    else document.documentElement.setAttribute('data-textsize',size);
+    document.querySelectorAll('.textsize-opt').forEach(function(b){
+      b.classList.toggle('active',b.dataset.textsize===size);
+    });
+  }
+  document.getElementById('textsize-options').addEventListener('click',(e)=>{
+    const btn=e.target.closest('.textsize-opt');
+    if(!btn) return;
+    const size=btn.dataset.textsize;
+    saveSettings({textSize:size});
+    applyTextSize(size);
+  });
+
+  // Init: set edition 1 if none saved
+  const s=loadSettings();
+  if(!s.edition) saveSettings({edition:1,editionDate:new Date().toISOString()});
+  renderSettings();
+  applyContrast(s.contrastMode||'normal');
+  applyTextSize(s.textSize||'standard');
 })();
 
 /* =======================================================
@@ -2187,7 +2936,7 @@ calcFTO();
 const LAT=42.28, LON=-83.74;
 
 function setBody(el,html){el.classList.remove('loading');el.innerHTML=html}
-function setErr(el,label){el.classList.remove('loading');el.innerHTML='<div style="color:#7a7166;font-size:11px">Could not load '+label+'. Try again later.</div>'}
+function setErr(el,label){el.classList.remove('loading');el.innerHTML='<div style="color:var(--ink-2);font-size:11px">Could not load '+label+'. Try again later.</div>'}
 
 function wxCode(c){
   const m={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',48:'Foggy',51:'Light Drizzle',53:'Drizzle',55:'Heavy Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',75:'Heavy Snow',80:'Showers',81:'Showers',82:'Heavy Showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
@@ -2332,6 +3081,193 @@ document.querySelector('.tab[data-target="misc"]').addEventListener('click',()=>
 document.querySelectorAll('.tab[data-target]').forEach(t=>{
   if(t.dataset.target!=='misc') t.addEventListener('click',stopTimer);
 });
+
+/* =======================================================
+   9) SUPPLIES ORDERING
+   ======================================================= */
+(function(){
+  const SUPPLY_ITEMS=[
+    {code:'46218',name:'MASK, SLEEP'},
+    {code:'1074',name:'SOAP, BAR DEODORANT WRAPPED 1.5OZ'},
+    {code:'1053',name:'OIL, BABY 2OZ'},
+    {code:'2537',name:'LOTION, BODY REMEDY ESSENTIALS'},
+    {code:'78245',name:'LOTION, AROMATHERAPY LAVENDER 1OZ'},
+    {code:'2629',name:'SHAMPOO, 2OZ'},
+    {code:'1493',name:'CREAM, SHAVING 1.5OZ'},
+    {code:'1049',name:'TOOTHBRUSH, ADULT'},
+    {code:'1056',name:'TOOTHPASTE, FLUORIDE MINT FLAVORED .6OZ'},
+    {code:'72113',name:'SUB/ FLOSS, DENTAL'},
+    {code:'1047',name:'BRUSH, HAIR PLASTIC 7IN'},
+    {code:'91222',name:'LOTION, TEXTURED HAIR 4OZ'},
+    {code:'91217',name:'PICK, HAIR'},
+    {code:'91218',name:'CAP, SHOWER'},
+    {code:'91220',name:'SHAMPOO, TEXTURED HAIR CANTU 2OZ'},
+    {code:'91219',name:'DETANGLER, TEXTURED HAIR CANTU 6OZ'},
+    {code:'91221',name:'CONDITIONER, TEXTURED HAIR CANTU 2OZ'},
+    {code:'1061',name:'MOUTHWASH, NONALCOHOLIC CORINZ 1.5OZ'},
+    {code:'40845',name:'EAR PLUGS, TAPERFIT',max:1},
+    {code:'74599',name:'LIP BALM'},
+    {code:'11169',name:'BREAST SHELL'},
+    {code:'1021',name:'BAG, PATIENT BELONGING 20IN X 20IN'},
+    {code:'71719',name:'KIT, PATIENT AMENITY FOR AES/CES/CSR/PACU'},
+    {code:'2762',name:'FOAM, EGGCRATE MATTRESS'}
+  ];
+  const DEPTS={
+    'picu-host':{desk:'Floor Ten GSS Desk Mott 10-243'},
+    'picu-clerk':{desk:'Floor Ten GSS Desk Mott 10-243'},
+    'pctu-clerk':{desk:'PCTU Clerk Desk 10-211'}
+  };
+
+  let sup=loadStore().supplies||{};
+  if(!sup.dept) sup.dept='picu-host';
+  if(!sup.recipient) sup.recipient='';
+  if(!sup.qty) sup.qty={};
+  if(!sup.nonstock) sup.nonstock=[];
+
+  function saveSup(){saveStore({supplies:sup})}
+  function nsUID(){return 'n'+Math.random().toString(36).slice(2,9)}
+
+  function renderItems(){
+    const list=document.getElementById('sup-list');
+    list.innerHTML=SUPPLY_ITEMS.map(it=>{
+      const q=sup.qty[it.code]||0;
+      const atMax=it.max!=null&&q>=it.max;
+      return `<div class="sup-item${q>0?' has-qty':''}" data-code="${it.code}">
+        <div class="sup-item-info">
+          <div class="sup-item-name">${escapeHtml(it.name)}</div>
+          <div class="sup-item-code">Code ${it.code}${it.max!=null?' · max '+it.max:''}</div>
+        </div>
+        <div class="sup-qty">
+          <button class="sup-qty-btn" data-code="${it.code}" data-dir="-1" aria-label="Decrease ${escapeHtml(it.name)}">−</button>
+          <input type="number" class="sup-qty-input" data-code="${it.code}" min="0"${it.max!=null?' max="'+it.max+'"':''} value="${q}" inputmode="numeric">
+          <button class="sup-qty-btn" data-code="${it.code}" data-dir="1" aria-label="Increase ${escapeHtml(it.name)}"${atMax?' disabled':''}>+</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.sup-qty-btn').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const code=b.dataset.code, dir=parseInt(b.dataset.dir,10);
+        const cur=sup.qty[code]||0;
+        setQty(code,Math.max(0,cur+dir));
+      });
+    });
+    list.querySelectorAll('.sup-qty-input').forEach(inp=>{
+      inp.addEventListener('input',()=>{
+        const v=Math.max(0,parseInt(inp.value,10)||0);
+        setQty(inp.dataset.code,v,false);
+      });
+      inp.addEventListener('blur',renderItems);
+    });
+  }
+
+  function setQty(code,val,rerender){
+    const item=SUPPLY_ITEMS.find(i=>i.code===code);
+    if(item&&item.max!=null) val=Math.min(val,item.max);
+    if(val>0) sup.qty[code]=val; else delete sup.qty[code];
+    saveSup();
+    if(rerender!==false) renderItems();
+    buildEmail();
+  }
+
+  function renderNonstock(){
+    const list=document.getElementById('sup-ns-list');
+    if(!sup.nonstock.length){ list.innerHTML=''; return; }
+    list.innerHTML=sup.nonstock.map(ns=>`
+      <div class="sup-nonstock-item" data-id="${ns.id}">
+        <span class="n-text">${escapeHtml(ns.name)} × ${ns.qty}</span>
+        <button class="n-del" data-id="${ns.id}" aria-label="Remove">×</button>
+      </div>`).join('');
+    list.querySelectorAll('.n-del').forEach(b=>b.addEventListener('click',()=>{
+      sup.nonstock=sup.nonstock.filter(n=>n.id!==b.dataset.id);
+      saveSup(); renderNonstock(); buildEmail();
+    }));
+  }
+
+  function buildEmail(){
+    const dept=DEPTS[sup.dept]||DEPTS['picu-host'];
+    const recipient=(sup.recipient||'').trim();
+    const parts=[];
+    SUPPLY_ITEMS.forEach(it=>{
+      const q=sup.qty[it.code]||0;
+      if(q>0) parts.push(q+'x '+it.code);
+    });
+    const nonstockParts=sup.nonstock.filter(n=>n.qty>0).map(n=>n.qty+'x '+n.name);
+    const allParts=parts.concat(nonstockParts);
+
+    const lines=[];
+    lines.push(recipient?'Hi '+recipient+',':'Hello');
+    lines.push('');
+    lines.push('We require the following items to be delivered as visitor amenities to the '+dept.desk+'.');
+    lines.push('');
+    lines.push(allParts.length?allParts.join(', '):'[Ex. 10x 2537, 5x 1853]');
+    if(nonstockParts.length){
+      lines.push('');
+      lines.push("Note: the following are non-stock items and will need a supervisor's approval — "+nonstockParts.join(', ')+'.');
+    }
+    lines.push('');
+    lines.push('The Unit Code is 206760');
+    lines.push('');
+    lines.push('Please call 734 232-7399 for any questions.');
+    lines.push('');
+    lines.push('Thank you!');
+    document.getElementById('sup-output').value=lines.join('\n');
+  }
+
+  document.getElementById('sup-dept').addEventListener('change',e=>{
+    sup.dept=e.target.value; saveSup(); buildEmail();
+  });
+  document.getElementById('sup-recipient').addEventListener('input',e=>{
+    sup.recipient=e.target.value; saveSup(); buildEmail();
+  });
+
+  document.getElementById('sup-ns-add').addEventListener('click',()=>{
+    const nameInp=document.getElementById('sup-ns-name');
+    const qtyInp=document.getElementById('sup-ns-qty');
+    const name=nameInp.value.trim();
+    const qty=Math.max(1,parseInt(qtyInp.value,10)||1);
+    if(!name) return;
+    sup.nonstock.push({id:nsUID(),name,qty});
+    nameInp.value=''; qtyInp.value='1';
+    saveSup(); renderNonstock(); buildEmail();
+    nameInp.focus();
+  });
+  document.getElementById('sup-ns-name').addEventListener('keydown',e=>{
+    if(e.key==='Enter') document.getElementById('sup-ns-add').click();
+  });
+
+  document.getElementById('sup-copy').addEventListener('click',()=>{
+    const out=document.getElementById('sup-output');
+    const msg=document.getElementById('sup-copy-msg');
+    const done=()=>{msg.textContent='✓ Copied to clipboard.'; setTimeout(()=>{msg.textContent=''},2500)};
+    const fallback=()=>{
+      out.removeAttribute('readonly'); out.focus(); out.select();
+      try{document.execCommand('copy'); done();}
+      catch(e){msg.textContent='Copy failed — select and copy manually.'}
+      out.setAttribute('readonly','');
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(out.value).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  document.getElementById('sup-reset').addEventListener('click',()=>{
+    sup={dept:'picu-host',recipient:'',qty:{},nonstock:[]};
+    saveSup();
+    document.getElementById('sup-dept').value=sup.dept;
+    document.getElementById('sup-recipient').value='';
+    renderItems(); renderNonstock(); buildEmail();
+    document.getElementById('sup-copy-msg').textContent='';
+  });
+
+  // init
+  document.getElementById('sup-dept').value=sup.dept;
+  document.getElementById('sup-recipient').value=sup.recipient;
+  renderItems();
+  renderNonstock();
+  buildEmail();
+})();
 </script>
 </body>
 </html>
