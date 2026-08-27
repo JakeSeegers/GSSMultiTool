@@ -3040,11 +3040,12 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
     {code:'1061',name:'MOUTHWASH, NONALCOHOLIC CORINZ 1.5OZ'},
     {code:'40845',name:'EAR PLUGS, TAPERFIT',max:1},
     {code:'74599',name:'LIP BALM'},
-    {code:'11169',name:'BREAST SHELL'}
+    {code:'11169',name:'BREAST SHELL'},
+    {code:'2762',name:'FOAM, EGGCRATE MATTRESS'}
   ];
   const DEPTS={
-    'picu-host':{desk:'Floor Ten GSS Desk 10-243'},
-    'picu-clerk':{desk:'Floor Ten GSS Desk 10-243'},
+    'picu-host':{desk:'Floor Ten GSS Desk Mott 10-243'},
+    'picu-clerk':{desk:'Floor Ten GSS Desk Mott 10-243'},
     'pctu-clerk':{desk:'PCTU Clerk Desk 10-211'}
   };
 
@@ -3119,25 +3120,27 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
     const parts=[];
     SUPPLY_ITEMS.forEach(it=>{
       const q=sup.qty[it.code]||0;
-      if(q>0) parts.push(it.code+' x '+q);
+      if(q>0) parts.push(q+'x '+it.code);
     });
-    const nonstockParts=sup.nonstock.filter(n=>n.qty>0).map(n=>n.name+' x '+n.qty);
+    const nonstockParts=sup.nonstock.filter(n=>n.qty>0).map(n=>n.qty+'x '+n.name);
     const allParts=parts.concat(nonstockParts);
 
     const lines=[];
-    lines.push('Hi '+(recipient||'[Name]')+',');
+    lines.push(recipient?'Hi '+recipient+',':'Hello');
     lines.push('');
     lines.push('We require the following items to be delivered as visitor amenities to the '+dept.desk+'.');
     lines.push('');
-    lines.push(allParts.length?allParts.join(', '):'[select items above]');
-    lines.push('');
-    lines.push('You can either call supply chain at 936-4029 or email MS-CSR-STAFF@med.umich.edu. Please include your department ordering code.');
+    lines.push(allParts.length?allParts.join(', '):'[Ex. 10x 2537, 5x 1853]');
     if(nonstockParts.length){
       lines.push('');
       lines.push("Note: the following are non-stock items and will need a supervisor's approval — "+nonstockParts.join(', ')+'.');
     }
     lines.push('');
-    lines.push('Thank you.');
+    lines.push('The Unit Code is 206760');
+    lines.push('');
+    lines.push('Please call 734 232-7399 for any questions.');
+    lines.push('');
+    lines.push('Thank you!');
     document.getElementById('sup-output').value=lines.join('\n');
   }
 
