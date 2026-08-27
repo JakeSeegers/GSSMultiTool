@@ -1673,7 +1673,7 @@
    0) STORAGE
    ======================================================= */
 const STORE_KEY='shiftConsole.v1';
-const BUILD_STAMP='2026-08-09b'; // bump on deploy to verify Pages picked up the latest push
+const BUILD_STAMP='2026-08-09c'; // bump on deploy to verify Pages picked up the latest push
 function loadStore(){
   try{
     const raw=localStorage.getItem(STORE_KEY);
@@ -3028,12 +3028,18 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
   const SUPPLY_ITEMS=[
     {code:'46218',name:'MASK, SLEEP'},
     {code:'1074',name:'SOAP, BAR DEODORANT WRAPPED 1.5OZ'},
+    {code:'1053',name:'OIL, BABY 2OZ'},
     {code:'2537',name:'LOTION, BODY REMEDY ESSENTIALS'},
+    {code:'78245',name:'LOTION, AROMATHERAPY LAVENDER 1OZ'},
     {code:'2629',name:'SHAMPOO, 2OZ'},
+    {code:'1493',name:'CREAM, SHAVING 1.5OZ'},
     {code:'1049',name:'TOOTHBRUSH, ADULT'},
     {code:'1056',name:'TOOTHPASTE, FLUORIDE MINT FLAVORED .6OZ'},
+    {code:'72113',name:'SUB/ FLOSS, DENTAL'},
+    {code:'1047',name:'BRUSH, HAIR PLASTIC 7IN'},
     {code:'91222',name:'LOTION, TEXTURED HAIR 4OZ'},
     {code:'91217',name:'PICK, HAIR'},
+    {code:'91218',name:'CAP, SHOWER'},
     {code:'91220',name:'SHAMPOO, TEXTURED HAIR CANTU 2OZ'},
     {code:'91219',name:'DETANGLER, TEXTURED HAIR CANTU 6OZ'},
     {code:'91221',name:'CONDITIONER, TEXTURED HAIR CANTU 2OZ'},
@@ -3041,6 +3047,8 @@ document.querySelectorAll('.tab[data-target]').forEach(t=>{
     {code:'40845',name:'EAR PLUGS, TAPERFIT',max:1},
     {code:'74599',name:'LIP BALM'},
     {code:'11169',name:'BREAST SHELL'},
+    {code:'1021',name:'BAG, PATIENT BELONGING 20IN X 20IN'},
+    {code:'71719',name:'KIT, PATIENT AMENITY FOR AES/CES/CSR/PACU'},
     {code:'2762',name:'FOAM, EGGCRATE MATTRESS'}
   ];
   const DEPTS={
